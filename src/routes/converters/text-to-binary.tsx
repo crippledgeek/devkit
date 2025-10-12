@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
-import TextToBinary from "@/pages/TextToBinary";
+import TextToBinary from '@/pages/TextToBinary';
 import { iconvReadyQueryOptions } from '@/lib/queries/iconv'
+import {LoaderPending} from '@/components/Loader'
 
 
 export const Route = createFileRoute('/converters/text-to-binary')({
@@ -9,4 +10,6 @@ export const Route = createFileRoute('/converters/text-to-binary')({
 
     },
     component: TextToBinary,
+    pendingComponent: LoaderPending,
+
 })
