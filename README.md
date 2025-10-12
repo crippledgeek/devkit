@@ -137,8 +137,6 @@ If you find DevKit useful, please consider giving it a star! ⭐
 
 ---
 
-<div align="center">
-  <strong>Made with ❤️ by developers, for developers</strong>
-  <br>
-  <sub>DevKit - Because developers deserve beautiful tools too.</sub>
-</div>
+
+**DevKit**—Crafted with precision and care  
+*Making developer tools beautiful, one converter at a time.*
