@@ -13,12 +13,12 @@ DevKit is a blazingly fast, beautifully crafted collection of essential develope
 
 ## ✨ Features
 
-- **🔄 Text ↔ Binary Converter** - Encode and decode text to/from binary with multiple character encodings
-- **🎨 Multiple Encodings** - Support for UTF-8, Latin1, Shift-JIS, GBK, and more
-- **⚡ Lightning Fast** - Built with Vite for instant hot module replacement
+- **🔄 Text ↔ Binary Converter—**Encode and decode text to/from binary with multiple character encodings
+- **🎨 Multiple Encodings—**Support for UTF-8, Latin1, Shift-JIS, GBK, and more
+- **⚡ Lightning Fast—**Built with Vite for instant hot module replacement
 - **🎯 Type-Safe** - 100% TypeScript for bulletproof code
-- **📱 Responsive** - Beautiful UI that works on all devices
-- **🌙 Coming Soon** - Dark mode, JWT tools, hash generators, and more!
+- **📱 Responsive—**Beautiful UI that works on all devices
+- **🌙 Coming Soon—**Dark mode, JWT tools, hash generators, and more!
 
 ---
 
@@ -53,13 +53,13 @@ Visit `http://localhost:5173` and start converting! 🎉
 
 DevKit is built with modern, cutting-edge technologies:
 
-- **⚛️ React 18** - UI library
-- **🎯 TypeScript** - Type safety
+- **⚛️ React 18—**UI library
+- **🎯 TypeScript—**Type safety
 - **⚡ Vite** - Build tool & dev server
-- **🎨 Tailwind CSS v4** - Styling
+- **🎨 Tailwind CSS v4—**Styling
 - **🧭 TanStack Router** - Type-safe routing
-- **📝 TanStack Form** - Powerful form management
-- **🔍 TanStack Query** - Data fetching & caching
+- **📝 TanStack Form—**Powerful form management
+- **🔍 TanStack Query—**Data fetching and caching
 - **🎭 React Aria Components** - Accessible UI primitives
 - **🎪 JollyUI** - Beautiful component library
 - **🔤 iconv-lite** - Character encoding support
@@ -119,7 +119,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## 📝 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License—see the [LICENSE](LICENSE) file for details.
 
 ---
 
