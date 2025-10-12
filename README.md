@@ -1,73 +1,144 @@
-# React + TypeScript + Vite
+# 🛠️ DevKit
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> **Your Swiss Army Knife for Developer Utilities**
 
-Currently, two official plugins are available:
+DevKit is a blazingly fast, beautifully crafted collection of essential developer tools. Convert, encode, decode, and transform data with ease—all in one sleek web application.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?logo=typescript)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-18-61dafb?logo=react)](https://reactjs.org/)
+[![Vite](https://img.shields.io/badge/Vite-5-646cff?logo=vite)](https://vitejs.dev/)
+[![TailwindCSS](https://img.shields.io/badge/Tailwind-4-38bdf8?logo=tailwindcss)](https://tailwindcss.com/)
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## ✨ Features
 
-## Expanding the ESLint configuration
+- **🔄 Text ↔ Binary Converter** - Encode and decode text to/from binary with multiple character encodings
+- **🎨 Multiple Encodings** - Support for UTF-8, Latin1, Shift-JIS, GBK, and more
+- **⚡ Lightning Fast** - Built with Vite for instant hot module replacement
+- **🎯 Type-Safe** - 100% TypeScript for bulletproof code
+- **📱 Responsive** - Beautiful UI that works on all devices
+- **🌙 Coming Soon** - Dark mode, JWT tools, hash generators, and more!
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+---
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 🚀 Quick Start
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Prerequisites
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+- Node.js 18+
+- npm or pnpm
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/devkit.git
+
+# Navigate to project
+cd devkit
+
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Visit `http://localhost:5173` and start converting! 🎉
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+---
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## 🏗️ Tech Stack
+
+DevKit is built with modern, cutting-edge technologies:
+
+- **⚛️ React 18** - UI library
+- **🎯 TypeScript** - Type safety
+- **⚡ Vite** - Build tool & dev server
+- **🎨 Tailwind CSS v4** - Styling
+- **🧭 TanStack Router** - Type-safe routing
+- **📝 TanStack Form** - Powerful form management
+- **🔍 TanStack Query** - Data fetching & caching
+- **🎭 React Aria Components** - Accessible UI primitives
+- **🎪 JollyUI** - Beautiful component library
+- **🔤 iconv-lite** - Character encoding support
+
+---
+
+## 📦 Project Structure
+
 ```
+devkit/
+├── src/
+│   ├── components/       # Reusable UI components
+│   │   ├── form/        # Form components (Select, TextArea, Button, etc.)
+│   │   ├── Header.tsx   # Navigation header
+│   │   └── Layout.tsx   # Page layout wrapper
+│   ├── lib/             # Utilities & helpers
+│   │   ├── encoding.ts  # Text/binary conversion logic
+│   │   └── queryClient.ts
+│   ├── routes/          # Route components
+│   └── main.tsx         # Application entry point
+├── public/              # Static assets
+└── vite.config.ts       # Vite configuration
+```
+
+---
+
+## 🎯 Roadmap
+
+- [x] Text to Binary Converter
+- [x] Multi-encoding support
+- [x] Composable form components
+- [ ] JWT Decoder & Validator
+- [ ] Base64 Encoder/Decoder
+- [ ] Hash Generators (MD5, SHA-256, etc.)
+- [ ] URL Encoder/Decoder
+- [ ] JSON Formatter & Validator
+- [ ] Regex Tester
+- [ ] UUID Generator
+- [ ] Color Converter
+- [ ] Dark Mode
+- [ ] PWA Support
+- [ ] Offline Mode
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the project
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+---
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 💖 Acknowledgments
+
+- Built with love and caffeine ☕
+- Inspired by [CyberChef](https://gchq.github.io/CyberChef/), [RapidTables](https://www.rapidtables.com/), and developer pain points
+- Special thanks to the open-source community
+
+---
+
+## 🌟 Star History
+
+If you find DevKit useful, please consider giving it a star! ⭐
+
+---
+
+<div align="center">
+  <strong>Made with ❤️ by developers, for developers</strong>
+  <br>
+  <sub>DevKit - Because developers deserve beautiful tools too.</sub>
+</div>
