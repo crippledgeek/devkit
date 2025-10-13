@@ -2,7 +2,6 @@
  * Commonly used encodings supported by iconv-lite.
  * (full list: https://github.com/ashtuchkin/iconv-lite/wiki/Supported-Encodings)
  */
-// Define the full set of supported encodings once and derive the ValidEncoding type from it
 export const ALL_ENCODINGS = [
     // Unicode
     'utf8', 'utf-8', 'utf16le', 'ucs2',
@@ -63,6 +62,18 @@ export interface Base64EncodingOptions {
     encoding?: ValidEncoding;
 }
 
+/**
+ * Options for Hex conversion.
+ */
+export interface HexEncodingOptions {
+    /** Character encoding to use (default: 'utf8') */
+    encoding?: ValidEncoding;
+    /** Delimiter between hex bytes (default: '') */
+    delimiter?: string;
+    /** Use uppercase hex (default: false) */
+    uppercase?: boolean;
+}
+
 // Lazy iconv-lite loader (separate chunk)
 type IconvLite = typeof import('iconv-lite')
 let iconvPromise: Promise<IconvLite> | null = null;
@@ -104,6 +115,44 @@ function isUtf8(enc?: string) {
 }
 
 /**
+ * Encode text to bytes using the specified charset.
+ */
+async function encodeToBytes(text: string, encoding: ValidEncoding): Promise<Uint8Array> {
+    if (isUtf8(encoding)) {
+        const enc = new TextEncoder();
+        return enc.encode(text);
+    }
+
+    const enc = normalizeEncoding(encoding);
+    const iconv = await getIconv();
+
+    if (!iconv.encodingExists(enc)) {
+        throw new Error(`Unsupported encoding: "${encoding}" (normalized: "${enc}")`);
+    }
+
+    return iconv.encode(text, enc);
+}
+
+/**
+ * Decode bytes to text using the specified charset.
+ */
+async function decodeFromBytes(bytes: Uint8Array, encoding: ValidEncoding): Promise<string> {
+    if (isUtf8(encoding)) {
+        const dec = new TextDecoder('utf-8');
+        return dec.decode(bytes);
+    }
+
+    const enc = normalizeEncoding(encoding);
+    const iconv = await getIconv();
+
+    if (!iconv.encodingExists(enc)) {
+        throw new Error(`Unsupported encoding: "${encoding}" (normalized: "${enc}")`);
+    }
+
+    return iconv.decode(bytes, enc);
+}
+
+/**
  * Converts a string to its binary representation (8-bit groups) using the chosen encoding.
  * @example
  * await ToBinary("Hello") // "01001000 01100101 01101100 01101100 01101111"
@@ -116,22 +165,8 @@ async function ToBinary(
     const { encoding = 'utf8', delimiter = ' ' } = options;
     if (!text) return '';
 
-    // Fast path: use native TextEncoder for UTF-8
-    if (isUtf8(encoding)) {
-        const enc = new TextEncoder();
-        const buf = enc.encode(text);
-        return Array.from(buf, (b) => b.toString(2).padStart(8, '0')).join(delimiter);
-    }
-
-    const enc = normalizeEncoding(encoding);
-    const iconv = await getIconv();
-
-    if (!iconv.encodingExists(enc)) {
-        throw new Error(`Unsupported encoding: "${encoding}" (normalized: "${enc}")`);
-    }
-
-    const buf = iconv.encode(text, enc);
-    return Array.from(buf, (b: number) => b.toString(2).padStart(8, '0')).join(delimiter);
+    const buf = await encodeToBytes(text, encoding);
+    return Array.from(buf, (b) => b.toString(2).padStart(8, '0')).join(delimiter);
 }
 
 /**
@@ -146,7 +181,6 @@ async function ToText(
     const { encoding = 'utf8', delimiter = ' ' } = options;
     if (!binary) return '';
 
-    // Normalize and split into 8-bit groups
     let groups: string[];
     if (delimiter === '') {
         const compact = binary.replace(/[^01]/g, '');
@@ -165,21 +199,7 @@ async function ToText(
         .filter((n) => Number.isInteger(n) && n >= 0 && n <= 255);
 
     const buf = new Uint8Array(bytes);
-
-    // Fast path: use native TextDecoder for UTF-8
-    if (isUtf8(encoding)) {
-        const dec = new TextDecoder('utf-8');
-        return dec.decode(buf);
-    }
-
-    const enc = normalizeEncoding(encoding);
-    const iconv = await getIconv();
-
-    if (!iconv.encodingExists(enc)) {
-        throw new Error(`Unsupported encoding: "${encoding}" (normalized: "${enc}")`);
-    }
-
-    return iconv.decode(buf, enc);
+    return await decodeFromBytes(buf, encoding);
 }
 
 /**
@@ -195,23 +215,7 @@ async function ToBase64(
     const { encoding = 'utf8' } = options;
     if (!text) return '';
 
-    // Fast path: use native btoa for UTF-8
-    if (isUtf8(encoding)) {
-        const enc = new TextEncoder();
-        const buf = enc.encode(text);
-        // Convert Uint8Array to binary string for btoa
-        const binaryString = Array.from(buf, b => String.fromCharCode(b)).join('');
-        return btoa(binaryString);
-    }
-
-    const enc = normalizeEncoding(encoding);
-    const iconv = await getIconv();
-
-    if (!iconv.encodingExists(enc)) {
-        throw new Error(`Unsupported encoding: "${encoding}" (normalized: "${enc}")`);
-    }
-
-    const buf = iconv.encode(text, enc);
+    const buf = await encodeToBytes(text, encoding);
     const binaryString = Array.from(buf, b => String.fromCharCode(b)).join('');
     return btoa(binaryString);
 }
@@ -229,27 +233,67 @@ async function FromBase64(
     const { encoding = 'utf8' } = options;
     if (!base64) return '';
 
-    // Decode base64 to binary string
     const binaryString = atob(base64);
     const bytes = new Uint8Array(binaryString.length);
     for (let i = 0; i < binaryString.length; i++) {
         bytes[i] = binaryString.charCodeAt(i);
     }
 
-    // Fast path: use native TextDecoder for UTF-8
-    if (isUtf8(encoding)) {
-        const dec = new TextDecoder('utf-8');
-        return dec.decode(bytes);
+    return await decodeFromBytes(bytes, encoding);
+}
+
+/**
+ * Encode string to Hex with a specific encoding.
+ * @example
+ * await ToHex("Hello") // "48656c6c6f"
+ * await ToHex("Hello", { delimiter: ' ' }) // "48 65 6c 6c 6f"
+ * await ToHex("Hello", { uppercase: true }) // "48656C6C6F"
+ * await ToHex("Привет", { encoding: 'windows-1251' }) // "cff0e8e2e5f2"
+ */
+async function ToHex(
+    text: string,
+    options: HexEncodingOptions = {}
+): Promise<string> {
+    const { encoding = 'utf8', delimiter = '', uppercase = false } = options;
+    if (!text) return '';
+
+    const buf = await encodeToBytes(text, encoding);
+    const hex = Array.from(buf, b => b.toString(16).padStart(2, '0'));
+    const result = hex.join(delimiter);
+    return uppercase ? result.toUpperCase() : result;
+}
+
+/**
+ * Decode Hex back to string with a specific encoding.
+ * @example
+ * await FromHex("48656c6c6f") // "Hello"
+ * await FromHex("48 65 6c 6c 6f", { delimiter: ' ' }) // "Hello"
+ * await FromHex("cff0e8e2e5f2", { encoding: 'windows-1251' }) // "Привет"
+ * await FromHex("0x48656c6c6f") // "Hello" (handles 0x prefix)
+ */
+async function FromHex(
+    hex: string,
+    options: HexEncodingOptions = {}
+): Promise<string> {
+    const { encoding = 'utf8', delimiter = '' } = options;
+    if (!hex) return '';
+
+    const cleaned = hex.trim().replace(/^(0x|\\x)/gi, '');
+
+    let hexPairs: string[];
+    if (delimiter) {
+        hexPairs = cleaned.split(delimiter);
+    } else {
+        hexPairs = cleaned.match(/.{1,2}/g) || [];
     }
 
-    const enc = normalizeEncoding(encoding);
-    const iconv = await getIconv();
+    const bytes = hexPairs
+        .filter(h => /^[0-9a-fA-F]{1,2}$/.test(h))
+        .map(h => parseInt(h, 16))
+        .filter(n => Number.isInteger(n) && n >= 0 && n <= 255);
 
-    if (!iconv.encodingExists(enc)) {
-        throw new Error(`Unsupported encoding: "${encoding}" (normalized: "${enc}")`);
-    }
-
-    return iconv.decode(bytes, enc);
+    const buf = new Uint8Array(bytes);
+    return await decodeFromBytes(buf, encoding);
 }
 
 /**
@@ -285,4 +329,12 @@ export const Binary = {
 export const Base64 = {
     encode: ToBase64,
     decode: FromBase64,
+};
+
+/**
+ * Namespaced helpers for Hex conversions for ergonomic API.
+ */
+export const Hex = {
+    encode: ToHex,
+    decode: FromHex,
 };
