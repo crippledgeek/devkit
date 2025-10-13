@@ -1,44 +1,39 @@
-import { Binary, isValidEncoding } from '@/lib/encoding'
+import { Base64, isValidEncoding } from '@/lib/encoding'
 import { FormButton, FormSelect, FormTextArea } from '@/components/form'
 import { useConverterForm } from '@/hooks/useConverterForm'
 
-export default function TextBinaryConverter() {
-    const { fromText, toText } = Binary
+export default function TextBase64Converter() {
+    const { encode, decode } = Base64
 
     const { form, output, setOutput, handleReset, encodingOptions } = useConverterForm({
         defaultValues: {
             mode: 'encode',
             encoding: 'utf8',
-            delimiter: ' ',
             input: '',
         },
         onSubmit: async (value) => {
-            const { mode, encoding, delimiter, input } = value
+            const { mode, encoding, input } = value
             const enc = isValidEncoding(encoding) ? encoding : 'utf8'
 
             const result = mode === 'decode'
-                ? await toText(input, { encoding: enc, delimiter })
-                : await fromText(input, { encoding: enc, delimiter })
+                ? await decode(input, { encoding: enc })
+                : await encode(input, { encoding: enc })
 
             setOutput(result)
         },
     })
 
-    const delimiterOptions = [
-        { value: ' ', label: 'Space' },
-        { value: '', label: 'None' },
-        { value: '-', label: 'Dash' },
-        { value: ',', label: 'Comma' },
-    ]
-
-    const inputLabel = form.state.values.mode === 'decode' ? 'Binary input' : 'Text input'
-    const outputLabel = form.state.values.mode === 'decode' ? 'Text output' : 'Binary output'
+    const inputLabel = form.state.values.mode === 'decode' ? 'Base64 input' : 'Text input'
+    const outputLabel = form.state.values.mode === 'decode' ? 'Text output' : 'Base64 output'
+    const inputPlaceholder = form.state.values.mode === 'decode'
+        ? 'Enter Base64 string e.g. SGVsbG8gV29ybGQ='
+        : 'Enter text...'
 
     return (
         <div className="max-w-4xl mx-auto">
-            <h1 className="text-3xl font-bold mb-2">Text ↔ Binary Converter</h1>
+            <h1 className="text-3xl font-bold mb-2">Text ↔ Base64 Converter</h1>
             <p className="text-muted-foreground mb-6">
-                Convert between text and binary. Choose mode, encoding, and delimiter.
+                Convert between text and Base64. Choose mode and encoding.
             </p>
 
             <form
@@ -57,8 +52,8 @@ export default function TextBinaryConverter() {
                             value={field.state.value}
                             onChange={field.handleChange}
                             options={[
-                                { value: 'encode', label: 'Encode (Text → Binary)' },
-                                { value: 'decode', label: 'Decode (Binary → Text)' },
+                                { value: 'encode', label: 'Encode (Text → Base64)' },
+                                { value: 'decode', label: 'Decode (Base64 → Text)' },
                             ]}
                         />
                     )}
@@ -76,24 +71,12 @@ export default function TextBinaryConverter() {
                     )}
                 </form.Field>
 
-                <form.Field name="delimiter">
-                    {(field) => (
-                        <FormSelect
-                            name="delimiter"
-                            label="Delimiter"
-                            value={field.state.value}
-                            onChange={field.handleChange}
-                            options={delimiterOptions}
-                        />
-                    )}
-                </form.Field>
-
                 <form.Field name="input">
                     {(field) => (
                         <FormTextArea
                             name="input"
                             label={inputLabel}
-                            placeholder={form.state.values.mode === 'decode' ? 'Enter binary groups e.g. 01001000 01100101' : 'Enter text...'}
+                            placeholder={inputPlaceholder}
                             isRequired
                             value={field.state.value}
                             onChange={field.handleChange}

@@ -1,6 +1,3 @@
-// Remove static import of iconv-lite and use dynamic import to enable code-splitting
-// import iconv from 'iconv-lite';
-
 /**
  * Commonly used encodings supported by iconv-lite.
  * (full list: https://github.com/ashtuchkin/iconv-lite/wiki/Supported-Encodings)
@@ -56,6 +53,14 @@ export interface BinaryEncodingOptions {
     encoding?: ValidEncoding;
     /** Delimiter between byte groups in the binary string (default: ' ') */
     delimiter?: string;
+}
+
+/**
+ * Options for Base64 conversion.
+ */
+export interface Base64EncodingOptions {
+    /** Character encoding to use (default: 'utf8') */
+    encoding?: ValidEncoding;
 }
 
 // Lazy iconv-lite loader (separate chunk)
@@ -178,6 +183,76 @@ async function ToText(
 }
 
 /**
+ * Encode string to Base64 with a specific encoding.
+ * @example
+ * await ToBase64("Hello") // "SGVsbG8="
+ * await ToBase64("Привет", { encoding: 'windows-1251' }) // Base64 of win1251 bytes
+ */
+async function ToBase64(
+    text: string,
+    options: Base64EncodingOptions = {}
+): Promise<string> {
+    const { encoding = 'utf8' } = options;
+    if (!text) return '';
+
+    // Fast path: use native btoa for UTF-8
+    if (isUtf8(encoding)) {
+        const enc = new TextEncoder();
+        const buf = enc.encode(text);
+        // Convert Uint8Array to binary string for btoa
+        const binaryString = Array.from(buf, b => String.fromCharCode(b)).join('');
+        return btoa(binaryString);
+    }
+
+    const enc = normalizeEncoding(encoding);
+    const iconv = await getIconv();
+
+    if (!iconv.encodingExists(enc)) {
+        throw new Error(`Unsupported encoding: "${encoding}" (normalized: "${enc}")`);
+    }
+
+    const buf = iconv.encode(text, enc);
+    const binaryString = Array.from(buf, b => String.fromCharCode(b)).join('');
+    return btoa(binaryString);
+}
+
+/**
+ * Decode Base64 back to string with a specific encoding.
+ * @example
+ * await FromBase64("SGVsbG8=") // "Hello"
+ * await FromBase64(base64String, { encoding: 'windows-1251' }) // Decodes from win1251
+ */
+async function FromBase64(
+    base64: string,
+    options: Base64EncodingOptions = {}
+): Promise<string> {
+    const { encoding = 'utf8' } = options;
+    if (!base64) return '';
+
+    // Decode base64 to binary string
+    const binaryString = atob(base64);
+    const bytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+    }
+
+    // Fast path: use native TextDecoder for UTF-8
+    if (isUtf8(encoding)) {
+        const dec = new TextDecoder('utf-8');
+        return dec.decode(bytes);
+    }
+
+    const enc = normalizeEncoding(encoding);
+    const iconv = await getIconv();
+
+    if (!iconv.encodingExists(enc)) {
+        throw new Error(`Unsupported encoding: "${encoding}" (normalized: "${enc}")`);
+    }
+
+    return iconv.decode(bytes, enc);
+}
+
+/**
  * Get a list of popular encodings for UI dropdowns
  */
 export const POPULAR_ENCODINGS: readonly ValidEncoding[] = ALL_ENCODINGS;
@@ -202,4 +277,12 @@ export async function isEncodingSupported(encoding: string): Promise<boolean> {
 export const Binary = {
     toText: ToText,
     fromText: ToBinary,
+};
+
+/**
+ * Namespaced helpers for Base64 conversions for ergonomic API.
+ */
+export const Base64 = {
+    encode: ToBase64,
+    decode: FromBase64,
 };
