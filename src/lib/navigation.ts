@@ -10,7 +10,8 @@ export const navigation: NavItem[] = [
     to: '/converters',
     children: [
         { name: 'Text to Binary', to: '/converters/text-to-binary' },
-        { name: 'Text to Base64', to: '/converters/text-to-base64' }
+        { name: 'Text to Base64', to: '/converters/text-to-base64' },
+        { name: 'Text to Hexadecimal', to: '/converters/text-to-hexadecimal'}
     ],
   },
 ]
