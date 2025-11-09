@@ -1,3 +1,13 @@
+import {
+    EncodingError,
+    ERROR_CODES,
+    validateBinaryFormat,
+    validateBase64Format,
+    validateHexFormat,
+    validateInputSize,
+    validateNotEmpty,
+} from './errors'
+
 /**
  * Commonly used encodings supported by iconv-lite.
  * (full list: https://github.com/ashtuchkin/iconv-lite/wiki/Supported-Encodings)
@@ -127,7 +137,10 @@ async function encodeToBytes(text: string, encoding: ValidEncoding): Promise<Uin
     const iconv = await getIconv();
 
     if (!iconv.encodingExists(enc)) {
-        throw new Error(`Unsupported encoding: "${encoding}" (normalized: "${enc}")`);
+        throw new EncodingError(
+            `Encoding "${encoding}" is not supported (normalized to "${enc}").`,
+            ERROR_CODES.INVALID_ENCODING
+        );
     }
 
     return iconv.encode(text, enc);
@@ -146,7 +159,10 @@ async function decodeFromBytes(bytes: Uint8Array, encoding: ValidEncoding): Prom
     const iconv = await getIconv();
 
     if (!iconv.encodingExists(enc)) {
-        throw new Error(`Unsupported encoding: "${encoding}" (normalized: "${enc}")`);
+        throw new EncodingError(
+            `Encoding "${encoding}" is not supported (normalized to "${enc}").`,
+            ERROR_CODES.INVALID_ENCODING
+        );
     }
 
     return iconv.decode(bytes, enc);
@@ -165,6 +181,9 @@ async function ToBinary(
     const { encoding = 'utf8', delimiter = ' ' } = options;
     if (!text) return '';
 
+    validateNotEmpty(text, 'Text input');
+    validateInputSize(text);
+
     const buf = await encodeToBytes(text, encoding);
     return Array.from(buf, (b) => b.toString(2).padStart(8, '0')).join(delimiter);
 }
@@ -180,6 +199,9 @@ async function ToText(
 ): Promise<string> {
     const { encoding = 'utf8', delimiter = ' ' } = options;
     if (!binary) return '';
+
+    validateBinaryFormat(binary, delimiter);
+    validateInputSize(binary);
 
     let groups: string[];
     if (delimiter === '') {
@@ -215,6 +237,9 @@ async function ToBase64(
     const { encoding = 'utf8' } = options;
     if (!text) return '';
 
+    validateNotEmpty(text, 'Text input');
+    validateInputSize(text);
+
     const buf = await encodeToBytes(text, encoding);
     const binaryString = Array.from(buf, b => String.fromCharCode(b)).join('');
     return btoa(binaryString);
@@ -233,13 +258,23 @@ async function FromBase64(
     const { encoding = 'utf8' } = options;
     if (!base64) return '';
 
-    const binaryString = atob(base64);
-    const bytes = new Uint8Array(binaryString.length);
-    for (let i = 0; i < binaryString.length; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
-    }
+    validateBase64Format(base64);
+    validateInputSize(base64);
 
-    return await decodeFromBytes(bytes, encoding);
+    try {
+        const binaryString = atob(base64.trim());
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+        }
+
+        return await decodeFromBytes(bytes, encoding);
+    } catch {
+        throw new EncodingError(
+            'Failed to decode Base64 string. Please check the input format.',
+            ERROR_CODES.DECODE_FAILED
+        );
+    }
 }
 
 /**
@@ -256,6 +291,9 @@ async function ToHex(
 ): Promise<string> {
     const { encoding = 'utf8', delimiter = '', uppercase = false } = options;
     if (!text) return '';
+
+    validateNotEmpty(text, 'Text input');
+    validateInputSize(text);
 
     const buf = await encodeToBytes(text, encoding);
     const hex = Array.from(buf, b => b.toString(16).padStart(2, '0'));
@@ -277,6 +315,9 @@ async function FromHex(
 ): Promise<string> {
     const { encoding = 'utf8', delimiter = '' } = options;
     if (!hex) return '';
+
+    validateHexFormat(hex, delimiter);
+    validateInputSize(hex);
 
     const cleaned = hex.trim().replace(/^(0x|\\x)/gi, '');
 

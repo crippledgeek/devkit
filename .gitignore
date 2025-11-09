@@ -27,3 +27,6 @@ dist-ssr
 .tanstack
 .junie
 src/routeTree.gen.ts
+docs
+.claude
+CLAUDE.md

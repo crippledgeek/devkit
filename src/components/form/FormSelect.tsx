@@ -13,9 +13,10 @@ interface FormSelectProps {
     value: string
     onChange: (value: string) => void
     options: SelectOption[]
+    errorMessage?: string
 }
 
-export function FormSelect({ label, value, onChange, options }: FormSelectProps) {
+export function FormSelect({ label, value, onChange, options, errorMessage }: FormSelectProps) {
     const handleChange = (key: Key | null) => {
         if (key != null) {
             onChange(key.toString())
@@ -27,6 +28,7 @@ export function FormSelect({ label, value, onChange, options }: FormSelectProps)
         <Select
             selectedKey={value}
             onSelectionChange={handleChange}
+            isInvalid={!!errorMessage}
             className="group flex flex-col gap-2"
         >
             <Label>{label}</Label>
@@ -42,7 +44,7 @@ export function FormSelect({ label, value, onChange, options }: FormSelectProps)
                     ))}
                 </SelectListBox>
             </SelectPopover>
-            <FieldError />
+            {errorMessage && <FieldError>{errorMessage}</FieldError>}
         </Select>
     )
 }

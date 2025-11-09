@@ -12,6 +12,7 @@ interface FormTextAreaProps {
     value?: string
     onChange?: (value: string) => void
     className?: string
+    errorMessage?: string
 }
 
 export function FormTextArea({
@@ -23,7 +24,8 @@ export function FormTextArea({
                                  readOnly = false,
                                  value,
                                  onChange,
-                                 className
+                                 className,
+                                 errorMessage
                              }: FormTextAreaProps) {
     const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
         onChange?.(e.target?.value ?? '')
@@ -31,7 +33,11 @@ export function FormTextArea({
     const safeValue = typeof value === 'string' ? value : ''
 
     return (
-        <TextField name={name} isRequired={isRequired}>
+        <TextField
+            name={name}
+            isRequired={isRequired}
+            isInvalid={!!errorMessage}
+        >
             <Label>{label}</Label>
             <TextArea
                 placeholder={placeholder}
@@ -41,7 +47,7 @@ export function FormTextArea({
                 onChange={handleChange}
                 className={className}
             />
-            <FieldError/>
+            {errorMessage && <FieldError>{errorMessage}</FieldError>}
         </TextField>
     )
 }

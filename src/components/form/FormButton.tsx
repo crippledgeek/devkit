@@ -6,6 +6,7 @@ interface FormButtonProps {
     type?: "submit" | "button" | "reset"
     variant?: "primary" | "secondary" | "outline"
     onPress?: () => void
+    isDisabled?: boolean
     children: ReactNode
 }
 
@@ -25,11 +26,17 @@ export function FormButton({
                                type = "button",
                                variant = "primary",
                                onPress,
+                               isDisabled = false,
                                children
                            }: FormButtonProps) {
     const mappedVariant = mapVariant(variant)
     return (
-        <JollyButton type={type} variant={mappedVariant} onPress={onPress}>
+        <JollyButton
+            type={type}
+            variant={mappedVariant}
+            onPress={onPress}
+            isDisabled={isDisabled}
+        >
             {children}
         </JollyButton>
     )
