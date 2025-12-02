@@ -1,6 +1,7 @@
 import {Label, FieldError} from "@/components/ui/field"
 import {TextArea, TextField} from "@/components/ui/textfield"
 import type {ChangeEvent} from 'react'
+import { forwardRef } from 'react'
 
 interface FormTextAreaProps {
     name: string
@@ -15,7 +16,7 @@ interface FormTextAreaProps {
     errorMessage?: string
 }
 
-export function FormTextArea({
+export const FormTextArea = forwardRef<HTMLTextAreaElement, FormTextAreaProps>(({
                                  name,
                                  label,
                                  placeholder,
@@ -26,7 +27,7 @@ export function FormTextArea({
                                  onChange,
                                  className,
                                  errorMessage
-                             }: FormTextAreaProps) {
+                             }, ref) => {
     const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
         onChange?.(e.target?.value ?? '')
     }
@@ -40,6 +41,7 @@ export function FormTextArea({
         >
             <Label>{label}</Label>
             <TextArea
+                ref={ref}
                 placeholder={placeholder}
                 rows={rows}
                 readOnly={readOnly}
@@ -50,4 +52,6 @@ export function FormTextArea({
             {errorMessage && <FieldError>{errorMessage}</FieldError>}
         </TextField>
     )
-}
+})
+
+FormTextArea.displayName = 'FormTextArea'

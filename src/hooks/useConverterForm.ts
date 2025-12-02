@@ -5,6 +5,7 @@ import { getErrorMessage } from '@/lib/errors'
 
 interface UseConverterFormOptions<T> {
     defaultValues: T
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     validationSchema?: any
     onSubmit: (values: T) => Promise<void>
 }

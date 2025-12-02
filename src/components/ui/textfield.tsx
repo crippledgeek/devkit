@@ -1,5 +1,6 @@
 "use client"
 
+import { forwardRef } from "react"
 import {
   Input as AriaInput,
     type InputProps as AriaInputProps,
@@ -38,9 +39,10 @@ const Input = ({ className, ...props }: AriaInputProps) => {
   )
 }
 
-const TextArea = ({ className, ...props }: AriaTextAreaProps) => {
+const TextArea = forwardRef<HTMLTextAreaElement, AriaTextAreaProps>(({ className, ...props }, ref) => {
   return (
     <AriaTextArea
+      ref={ref}
       className={composeRenderProps(className, (className) =>
         cn(
           "flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground",
@@ -56,7 +58,9 @@ const TextArea = ({ className, ...props }: AriaTextAreaProps) => {
       {...props}
     />
   )
-}
+})
+
+TextArea.displayName = "TextArea"
 
 interface JollyTextFieldProps extends AriaTextFieldProps {
   label?: string

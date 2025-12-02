@@ -1,8 +1,23 @@
 import { Hex, isValidEncoding } from '@/lib/encoding'
 import { FormButton, FormSelect, FormTextArea } from '@/components/form'
 import { useConverterForm } from '@/hooks/useConverterForm'
+import { useFormHelpers } from '@/hooks/useFormHelpers'
 import { hexConverterSchema, type HexConverterForm } from '@/lib/validation-schemas'
 import { formatFieldErrors } from '@/lib/errors'
+
+function FieldError({
+    meta,
+    showWhenSubmitted,
+}: {
+    meta: { isTouched?: boolean; isBlurred?: boolean; errors?: unknown[] }
+    showWhenSubmitted: boolean
+}) {
+    const shouldShow = meta.isTouched || meta.isBlurred || showWhenSubmitted
+    const errs = meta.errors ?? []
+    return shouldShow && errs.length > 0 ? (
+        <em className="text-red-500 text-sm">{formatFieldErrors(errs)}</em>
+    ) : null
+}
 
 export default function TextHexConverter() {
     const { encode, decode } = Hex
@@ -29,6 +44,8 @@ export default function TextHexConverter() {
         },
     })
 
+    const { registerInputRef, focusFirstError } = useFormHelpers(form)
+
     const delimiterOptions = [
         { value: '', label: 'None' },
         { value: ' ', label: 'Space' },
@@ -45,18 +62,6 @@ export default function TextHexConverter() {
     const inputLabel = form.state.values.mode === 'decode' ? 'Hex input' : 'Text input'
     const outputLabel = form.state.values.mode === 'decode' ? 'Text output' : 'Hex output'
 
-    const showFieldError = (meta: {
-        isTouched?: boolean
-        touchedErrors?: unknown[]
-        errors?: unknown[]
-    }) => {
-        const shouldShow = meta.isTouched || form.state.isSubmitted
-        const errs = (meta.touchedErrors?.length ? meta.touchedErrors : meta.errors) ?? []
-        return shouldShow && errs.length > 0 ? (
-            <em className="text-red-500 text-sm">{formatFieldErrors(errs)}</em>
-        ) : null
-    }
-
     return (
         <div className="max-w-4xl mx-auto">
             <h1 className="text-3xl font-bold mb-2">Text ↔ Hex Converter</h1>
@@ -69,6 +74,7 @@ export default function TextHexConverter() {
                     e.preventDefault()
                     e.stopPropagation()
                     form.handleSubmit()
+                    focusFirstError()
                 }}
                 className="flex flex-col gap-6"
             >
@@ -91,7 +97,10 @@ export default function TextHexConverter() {
                                         { value: 'decode', label: 'Decode (Hex → Text)' },
                                     ]}
                                 />
-                                {showFieldError(field.state.meta)}
+                                <FieldError
+                                    meta={field.state.meta}
+                                    showWhenSubmitted={form.state.isSubmitted}
+                                />
                             </>
                         )
                     }}
@@ -109,7 +118,10 @@ export default function TextHexConverter() {
                                 onChange={(value) => field.setValue(value)}
                                 options={encodingOptions}
                             />
-                            {showFieldError(field.state.meta)}
+                            <FieldError
+                                meta={field.state.meta}
+                                showWhenSubmitted={form.state.isSubmitted}
+                            />
                         </>
                     )}
                 </form.Field>
@@ -127,7 +139,10 @@ export default function TextHexConverter() {
                                     onChange={(value) => field.setValue(value)}
                                     options={caseOptions}
                                 />
-                                {showFieldError(field.state.meta)}
+                                <FieldError
+                                    meta={field.state.meta}
+                                    showWhenSubmitted={form.state.isSubmitted}
+                                />
                             </>
                         )}
                     </form.Field>
@@ -145,7 +160,10 @@ export default function TextHexConverter() {
                                 onChange={(value) => field.setValue(value)}
                                 options={delimiterOptions}
                             />
-                            {showFieldError(field.state.meta)}
+                            <FieldError
+                                meta={field.state.meta}
+                                showWhenSubmitted={form.state.isSubmitted}
+                            />
                         </>
                     )}
                 </form.Field>
@@ -156,6 +174,7 @@ export default function TextHexConverter() {
                     {(field) => (
                         <>
                             <FormTextArea
+                                ref={registerInputRef('input')}
                                 name="input"
                                 label={inputLabel}
                                 placeholder={form.state.values.mode === 'decode' ? 'Enter hex string e.g. 48656c6c6f' : 'Enter text...'}
@@ -164,7 +183,10 @@ export default function TextHexConverter() {
                                 onChange={(e) => field.handleChange(e)}
                                 className={form.state.values.mode === 'decode' ? 'font-mono' : undefined}
                             />
-                            {showFieldError(field.state.meta)}
+                            <FieldError
+                                meta={field.state.meta}
+                                showWhenSubmitted={form.state.isSubmitted}
+                            />
                         </>
                     )}
                 </form.Field>
