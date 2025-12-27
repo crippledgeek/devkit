@@ -26,7 +26,6 @@ dist-ssr
 
 .tanstack
 .junie
-src/routeTree.gen.ts
-docs
+# Note: routeTree.gen.ts is now tracked for CI/CD type safety
 .claude
 CLAUDE.md
