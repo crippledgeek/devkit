@@ -1,3 +1,5 @@
+import { tools } from './tools'
+
 export type NavItem = {
   name: string
   to: string
@@ -8,10 +10,11 @@ export const navigation: NavItem[] = [
   {
     name: 'Converters',
     to: '/converters',
-    children: [
-        { name: 'Text to Binary', to: '/converters/text-to-binary' },
-        { name: 'Text to Base64', to: '/converters/text-to-base64' },
-        { name: 'Text to Hexadecimal', to: '/converters/text-to-hexadecimal'}
-    ],
+    children: tools
+      .filter((tool) => tool.category === 'Encoders')
+      .map((tool) => ({
+        name: tool.name,
+        to: tool.to,
+      })),
   },
 ]
