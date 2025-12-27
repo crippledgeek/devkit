@@ -379,3 +379,185 @@ export const Hex = {
     encode: ToHex,
     decode: FromHex,
 };
+
+/**
+ * URL encoding options
+ */
+export interface URLEncodingOptions {
+    mode?: 'component' | 'full'
+    encoding?: ValidEncoding
+}
+
+/**
+ * Encode string to URL-encoded format.
+ * @example
+ * URLEncode.encode("Hello World") // "Hello%20World"
+ * URLEncode.encode("Hello World", { mode: 'component' }) // "Hello%20World"
+ * URLEncode.encode("https://example.com/path?q=hello world", { mode: 'full' }) // "https://example.com/path?q=hello%20world"
+ * URLEncode.encode("Привет", { encoding: 'windows-1251' }) // "%CF%F0%E8%E2%E5%F2"
+ */
+async function EncodeURL(
+    text: string,
+    options: URLEncodingOptions = {}
+): Promise<string> {
+    const { mode = 'component', encoding = 'utf8' } = options;
+    if (!text) return '';
+
+    validateNotEmpty(text, 'Text input');
+    validateInputSize(text);
+
+    try {
+        // If UTF-8, use native browser encoding
+        if (isUtf8(encoding)) {
+            if (mode === 'full') {
+                return encodeURI(text);
+            }
+            return encodeURIComponent(text);
+        }
+
+        // For other encodings, convert to bytes first, then percent-encode
+        const bytes = await encodeToBytes(text, encoding);
+        const encoded = Array.from(bytes, byte =>
+            // Only encode non-ASCII and special characters
+            (byte >= 0x30 && byte <= 0x39) || // 0-9
+            (byte >= 0x41 && byte <= 0x5A) || // A-Z
+            (byte >= 0x61 && byte <= 0x7A) || // a-z
+            (mode === 'component' && (byte === 0x2D || byte === 0x5F || byte === 0x2E || byte === 0x7E)) || // -_.~
+            (mode === 'full' && (
+                byte === 0x3A || byte === 0x2F || byte === 0x3F || byte === 0x23 || // :/?#
+                byte === 0x5B || byte === 0x5D || byte === 0x40 || byte === 0x21 || // []@!
+                byte === 0x24 || byte === 0x26 || byte === 0x27 || byte === 0x28 || // $&'(
+                byte === 0x29 || byte === 0x2A || byte === 0x2B || byte === 0x2C || // )*+,
+                byte === 0x3B || byte === 0x3D || byte === 0x2D || byte === 0x5F || // ;=-_
+                byte === 0x2E || byte === 0x7E // .~
+            ))
+                ? String.fromCharCode(byte)
+                : `%${byte.toString(16).toUpperCase().padStart(2, '0')}`
+        ).join('');
+
+        return encoded;
+    } catch {
+        throw new EncodingError(
+            'Failed to encode URL. Please check the input.',
+            ERROR_CODES.ENCODE_FAILED
+        );
+    }
+}
+
+/**
+ * Decode URL-encoded string.
+ * @example
+ * URLEncode.decode("Hello%20World") // "Hello World"
+ * URLEncode.decode("https://example.com/path?q=hello%20world", { mode: 'full' }) // "https://example.com/path?q=hello world"
+ * URLEncode.decode("%CF%F0%E8%E2%E5%F2", { encoding: 'windows-1251' }) // "Привет"
+ */
+async function DecodeURL(
+    urlEncoded: string,
+    options: URLEncodingOptions = {}
+): Promise<string> {
+    const { mode = 'component', encoding = 'utf8' } = options;
+    if (!urlEncoded) return '';
+
+    validateNotEmpty(urlEncoded, 'URL input');
+    validateInputSize(urlEncoded);
+
+    try {
+        // If UTF-8, use native browser decoding
+        if (isUtf8(encoding)) {
+            if (mode === 'full') {
+                return decodeURI(urlEncoded);
+            }
+            return decodeURIComponent(urlEncoded);
+        }
+
+        // For other encodings, decode percent-encoding to bytes first
+        const bytes: number[] = [];
+        let i = 0;
+        while (i < urlEncoded.length) {
+            if (urlEncoded[i] === '%' && i + 2 < urlEncoded.length) {
+                const hex = urlEncoded.substring(i + 1, i + 3);
+                const byte = parseInt(hex, 16);
+                if (!isNaN(byte)) {
+                    bytes.push(byte);
+                    i += 3;
+                } else {
+                    bytes.push(urlEncoded.charCodeAt(i));
+                    i++;
+                }
+            } else {
+                bytes.push(urlEncoded.charCodeAt(i));
+                i++;
+            }
+        }
+
+        // Convert bytes to text using the specified encoding
+        const buf = new Uint8Array(bytes);
+        return await decodeFromBytes(buf, encoding);
+    } catch {
+        throw new EncodingError(
+            'Failed to decode URL. The input may be malformed or contain invalid percent-encoding.',
+            ERROR_CODES.DECODE_FAILED
+        );
+    }
+}
+
+/**
+ * Parse query string into key-value pairs
+ * @example
+ * URLEncode.parseQuery("?key1=value1&key2=value2") // { key1: "value1", key2: "value2" }
+ */
+function ParseQueryString(queryString: string): Record<string, string> {
+    if (!queryString) return {};
+
+    // Remove leading ? or # if present
+    const cleaned = queryString.replace(/^[?#]/, '');
+    if (!cleaned) return {};
+
+    const params: Record<string, string> = {};
+    const pairs = cleaned.split('&');
+
+    for (const pair of pairs) {
+        const [key, value = ''] = pair.split('=');
+        if (key) {
+            try {
+                params[decodeURIComponent(key)] = decodeURIComponent(value);
+            } catch {
+                // If decoding fails, use the raw value
+                params[key] = value;
+            }
+        }
+    }
+
+    return params;
+}
+
+/**
+ * Build query string from key-value pairs
+ * @example
+ * URLEncode.buildQuery({ key1: "value1", key2: "value2" }) // "key1=value1&key2=value2"
+ */
+function BuildQueryString(params: Record<string, string>): string {
+    if (!params || Object.keys(params).length === 0) return '';
+
+    return Object.entries(params)
+        .filter(([key]) => key !== '')
+        .map(([key, value]) => {
+            try {
+                return `${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
+            } catch {
+                return `${key}=${value}`;
+            }
+        })
+        .join('&');
+}
+
+/**
+ * Namespaced helpers for URL encoding for ergonomic API.
+ */
+export const URLEncode = {
+    encode: EncodeURL,
+    decode: DecodeURL,
+    parseQuery: ParseQueryString,
+    buildQuery: BuildQueryString,
+};
+

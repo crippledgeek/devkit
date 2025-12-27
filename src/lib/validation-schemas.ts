@@ -228,3 +228,56 @@ export const hexConverterSchema = z.object({
 export type BinaryConverterForm = z.infer<typeof binaryConverterSchema>
 export type Base64ConverterForm = z.infer<typeof base64ConverterSchema>
 export type HexConverterForm = z.infer<typeof hexConverterSchema>
+export type URLEncoderForm = z.infer<typeof urlEncoderSchema>
+
+/**
+ * URL-encoded string validation
+ */
+export const urlEncodedStringSchema = z
+    .string()
+    .min(1, 'URL input cannot be empty')
+    .max(MAX_INPUT_SIZE, `Input is too large. Maximum size is ${(MAX_INPUT_SIZE / (1024 * 1024)).toFixed(0)}MB`)
+    .refine(
+        (val) => {
+            // Check for valid percent-encoding format (%XX where XX are hex digits)
+            const percentMatches = val.match(/%[0-9A-Fa-f]{0,2}/g)
+            if (!percentMatches) return true // No percent signs is valid
+            return percentMatches.every(match => match.length === 3)
+        },
+        {
+            message: 'URL contains malformed percent-encoding. Each % must be followed by exactly 2 hexadecimal digits (e.g., %20)',
+        }
+    )
+
+/**
+ * URL Encoder form schema
+ */
+export const urlEncoderSchema = z.object({
+    mode: z.enum(['encode', 'decode']),
+    encoding: encodingSchema,
+    encodingMode: z.enum(['component', 'full']),
+    input: z.string(),
+}).superRefine((data, ctx) => {
+    // Conditional validation based on mode
+    if (data.mode === 'encode') {
+        const result = baseInputValidation.safeParse(data.input)
+        if (!result.success) {
+            result.error.issues.forEach(issue => {
+                ctx.addIssue({
+                    ...issue,
+                    path: ['input'],
+                })
+            })
+        }
+    } else {
+        const result = urlEncodedStringSchema.safeParse(data.input)
+        if (!result.success) {
+            result.error.issues.forEach(issue => {
+                ctx.addIssue({
+                    ...issue,
+                    path: ['input'],
+                })
+            })
+        }
+    }
+})

@@ -1,4 +1,4 @@
-import { Binary, Hash, Braces } from 'lucide-react'
+import { Binary, Hash, Braces, Link } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
 export interface Tool {
@@ -38,6 +38,15 @@ export const tools: Tool[] = [
     icon: Hash,
     to: '/converters/text-to-hexadecimal',
     tags: ['hex', 'hexadecimal', 'text', 'encoder', 'decoder'],
+  },
+  {
+    id: 'url-encoder',
+    name: 'URL Encoder/Decoder',
+    description: 'Encode and decode URL strings with component or full URL encoding modes',
+    category: 'Encoders',
+    icon: Link,
+    to: '/converters/url-encoder',
+    tags: ['url', 'encoder', 'decoder', 'uri', 'percent-encoding', 'query-string'],
   },
 ]
 
