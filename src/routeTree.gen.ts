@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ConvertersUrlEncoderRouteImport } from './routes/converters/url-encoder'
 import { Route as ConvertersTextToHexadecimalRouteImport } from './routes/converters/text-to-hexadecimal'
 import { Route as ConvertersTextToBinaryRouteImport } from './routes/converters/text-to-binary'
 import { Route as ConvertersTextToBase64RouteImport } from './routes/converters/text-to-base64'
@@ -17,6 +18,11 @@ import { Route as ConvertersTextToBase64RouteImport } from './routes/converters/
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConvertersUrlEncoderRoute = ConvertersUrlEncoderRouteImport.update({
+  id: '/converters/url-encoder',
+  path: '/converters/url-encoder',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ConvertersTextToHexadecimalRoute =
@@ -41,12 +47,14 @@ export interface FileRoutesByFullPath {
   '/converters/text-to-base64': typeof ConvertersTextToBase64Route
   '/converters/text-to-binary': typeof ConvertersTextToBinaryRoute
   '/converters/text-to-hexadecimal': typeof ConvertersTextToHexadecimalRoute
+  '/converters/url-encoder': typeof ConvertersUrlEncoderRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/converters/text-to-base64': typeof ConvertersTextToBase64Route
   '/converters/text-to-binary': typeof ConvertersTextToBinaryRoute
   '/converters/text-to-hexadecimal': typeof ConvertersTextToHexadecimalRoute
+  '/converters/url-encoder': typeof ConvertersUrlEncoderRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -54,6 +62,7 @@ export interface FileRoutesById {
   '/converters/text-to-base64': typeof ConvertersTextToBase64Route
   '/converters/text-to-binary': typeof ConvertersTextToBinaryRoute
   '/converters/text-to-hexadecimal': typeof ConvertersTextToHexadecimalRoute
+  '/converters/url-encoder': typeof ConvertersUrlEncoderRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -62,18 +71,21 @@ export interface FileRouteTypes {
     | '/converters/text-to-base64'
     | '/converters/text-to-binary'
     | '/converters/text-to-hexadecimal'
+    | '/converters/url-encoder'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/converters/text-to-base64'
     | '/converters/text-to-binary'
     | '/converters/text-to-hexadecimal'
+    | '/converters/url-encoder'
   id:
     | '__root__'
     | '/'
     | '/converters/text-to-base64'
     | '/converters/text-to-binary'
     | '/converters/text-to-hexadecimal'
+    | '/converters/url-encoder'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -81,6 +93,7 @@ export interface RootRouteChildren {
   ConvertersTextToBase64Route: typeof ConvertersTextToBase64Route
   ConvertersTextToBinaryRoute: typeof ConvertersTextToBinaryRoute
   ConvertersTextToHexadecimalRoute: typeof ConvertersTextToHexadecimalRoute
+  ConvertersUrlEncoderRoute: typeof ConvertersUrlEncoderRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -90,6 +103,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/converters/url-encoder': {
+      id: '/converters/url-encoder'
+      path: '/converters/url-encoder'
+      fullPath: '/converters/url-encoder'
+      preLoaderRoute: typeof ConvertersUrlEncoderRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/converters/text-to-hexadecimal': {
@@ -121,6 +141,7 @@ const rootRouteChildren: RootRouteChildren = {
   ConvertersTextToBase64Route: ConvertersTextToBase64Route,
   ConvertersTextToBinaryRoute: ConvertersTextToBinaryRoute,
   ConvertersTextToHexadecimalRoute: ConvertersTextToHexadecimalRoute,
+  ConvertersUrlEncoderRoute: ConvertersUrlEncoderRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
