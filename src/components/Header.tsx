@@ -1,4 +1,4 @@
-import { Menu as MenuIcon } from 'lucide-react'
+import { Menu as MenuIcon, Moon, Sun } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Link as RouterLink, MenuItemLink } from '@/components/aria-router-links'
 import {
@@ -11,11 +11,17 @@ import {
 import { navigation } from '@/lib/navigation'
 import Logo from '@/components/Logo'
 import type {FC} from "react";
+import { useThemeController } from '@/hooks/useThemeController'
 
  type HeaderProps = object
- 
- 
+
+
  const Header: FC<HeaderProps> = () => {
+    const { isDark, setTheme } = useThemeController()
+
+    const handleToggle = () => {
+        setTheme(isDark ? 'light' : 'dark')
+    }
 
     return (
         <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -64,8 +70,25 @@ import type {FC} from "react";
                     )}
                 </div>
 
-                {/* Mobile Menu */}
-                <div className="md:hidden">
+                {/* Dark Mode Toggle & Mobile Menu */}
+                <div className="flex items-center gap-2">
+                    {/* Dark Mode Toggle */}
+                    <Button
+                        aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+                        size="icon"
+                        variant="ghost"
+                        onPress={handleToggle}
+                        className="transition-transform hover:scale-110"
+                    >
+                        {isDark ? (
+                            <Sun className="h-5 w-5 transition-all" />
+                        ) : (
+                            <Moon className="h-5 w-5 transition-all" />
+                        )}
+                    </Button>
+
+                    {/* Mobile Menu */}
+                    <div className="md:hidden">
                     <MenuTrigger>
                         <Button aria-label="Menu" size="icon" variant="outline">
                             <MenuIcon className="h-5 w-5" />
@@ -101,6 +124,7 @@ import type {FC} from "react";
                             </Menu>
                         </MenuPopover>
                     </MenuTrigger>
+                    </div>
                 </div>
             </nav>
         </header>

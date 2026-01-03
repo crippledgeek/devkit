@@ -1,7 +1,8 @@
 # DevKit: Architectural Analysis & Phased Feature Roadmap
 
-**Document Version:** 1.0
-**Date:** December 27, 2025
+**Document Version:** 1.1
+**Date:** January 3, 2026
+**Last Updated:** January 3, 2026
 **Prepared by:** Expert Software Architect
 **Project:** DevKit - Developer Utilities Web Application
 
@@ -12,10 +13,11 @@
 DevKit is a modern, high-performance web application designed to provide developers with essential text encoding and conversion utilities. Built on a robust foundation of industry-leading frameworks and libraries, the application demonstrates excellent architectural decisions, type safety, and performance optimization.
 
 **Current Status:**
-- **Production-Ready Features:** 3 fully functional converters (Binary, Base64, Hexadecimal)
+- **Production-Ready Features:** 4 fully functional converters (Binary, Base64, Hexadecimal, URL Encoder)
 - **Code Quality:** High - Type-safe, well-structured, with comprehensive validation
 - **Performance:** Optimized with code splitting, lazy loading, and efficient caching
 - **Deployment:** Production-ready with Netlify configuration, security headers, and CDN optimization
+- **Phase 1 Progress:** Feature 1.1 Complete (URL Encoder/Decoder) ✅
 
 **Strategic Vision:**
 Transform DevKit from a focused encoding tool into a comprehensive developer utility suite with 20+ tools across 4 phases, maintaining the current high standards of performance, accessibility, and user experience.
@@ -62,7 +64,8 @@ src/routes/
 └── converters/
     ├── text-to-binary.tsx     # Binary converter route
     ├── text-to-base64.tsx     # Base64 converter route
-    └── text-to-hexadecimal.tsx # Hex converter route
+    ├── text-to-hexadecimal.tsx # Hex converter route
+    └── url-encoder.tsx        # URL encoder route ✅
 ```
 
 **Key Features:**
@@ -83,14 +86,15 @@ src/
 │   └── Providers.tsx      # Context providers (Query, Router, Devtools)
 ├── pages/                 # Page-level components with business logic
 ├── hooks/                 # Custom React hooks (useConverterForm, useFormHelpers)
-└── lib/                   # Core utilities (encoding, validation, queries)
+└── lib/                   # Core utilities (encoding, validation, queries, tools registry)
 ```
 
 **Design Patterns:**
 - **Composition over Inheritance** - Reusable form components compose React Aria primitives
-- **Custom Hooks for Logic Reuse** - `useConverterForm` standardizes converter patterns
+- **Custom Hooks for Logic Reuse** - `useConverterForm` and `useFormHelpers` standardize converter patterns
 - **Separation of Concerns** - Routes handle loading, pages handle UI, lib handles logic
 - **Provider Pattern** - Centralized context setup in `<Providers>`
+- **Tool Registry Pattern** - Centralized tool metadata in `src/lib/tools.ts` for navigation and discovery
 
 #### Encoding System Architecture
 
@@ -108,10 +112,11 @@ src/
    - Encoding normalization (e.g., 'utf-8' → 'utf8', 'shift-jis' → 'shift_jis')
    - Validation of encoding support before use
 
-3. **Three Conversion Types**
+3. **Four Conversion Types**
    - **Binary:** Text ↔ 8-bit binary groups with custom delimiters
    - **Base64:** Standard Base64 encoding/decoding with multi-encoding support
    - **Hex:** Hexadecimal with delimiter options, case control, and prefix handling (0x, \x)
+   - **URL:** URL encoding/decoding with component and full URL modes, plus query string utilities ✅
 
 4. **Ergonomic API**
    ```typescript
@@ -122,19 +127,29 @@ src/
    Base64.decode(base64, options) → text
    Hex.encode(text, options) → hex
    Hex.decode(hex, options) → text
+   URLEncode.encode(text, options) → url-encoded string ✅
+   URLEncode.decode(urlEncoded, options) → text ✅
+   URLEncode.parseQuery(queryString) → object ✅
+   URLEncode.buildQuery(params) → query string ✅
    ```
 
 #### Form System Architecture
 
-**Custom Hook:** `useConverterForm`
+**Custom Hooks:** `useConverterForm` and `useFormHelpers`
 
-**Responsibilities:**
+**useConverterForm Responsibilities:**
 - Form state management with TanStack Form
 - Output state management (separate from form state)
 - Error handling with user-friendly messages
 - Auto-clear output on mode change (prevent stale results)
 - Memoized encoding options for performance
 - Reset functionality
+
+**useFormHelpers Responsibilities:**
+- Focus management on validation errors
+- Input field ref registration
+- Auto-reset input field when mode changes
+- First error focusing after submission
 
 **Validation Strategy:**
 - **Client-side:** Zod schemas with conditional validation based on mode
@@ -250,6 +265,41 @@ binaryConverterSchema.superRefine((data, ctx) => {
 
 ---
 
+### 2.4 URL Encoder/Decoder ✅ NEW
+
+**Location:** `src/routes/converters/url-encoder.tsx`, `src/pages/URLEncoder.tsx`
+**Implemented:** December 27, 2025
+**Feature 1.1 Status:** ✅ Complete
+
+**Features:**
+- Bidirectional URL encoding/decoding
+- Component encoding mode (`encodeURIComponent`) - for query parameters
+- Full URL encoding mode (`encodeURI`) - for complete URLs
+- 80+ character encoding support (UTF-8, ISO-8859-x, Windows-125x, etc.)
+- Query string utilities (`parseQuery()`, `buildQuery()`)
+- Percent-encoding validation
+
+**Technical Highlights:**
+- Uses native browser APIs for UTF-8 (no dependencies)
+- Custom percent-encoding for non-UTF-8 encodings via iconv-lite
+- Comprehensive URL format validation
+- Educational UI explaining encoding mode differences
+- Follows established `useConverterForm` and `useFormHelpers` patterns
+
+**Bundle Size:** ~3.35 kB (gzipped: 1.31 kB)
+
+**Acceptance Criteria Met:**
+- ✅ Encode/decode URL components
+- ✅ Encode/decode full URLs
+- ✅ Parse query strings into key-value pairs
+- ✅ Build URLs from components
+- ✅ Validate URL format before decoding
+- ✅ Multi-encoding support (80+ encodings)
+
+**Status:** ✅ Production-ready, fully functional
+
+---
+
 ## 3. Technical Infrastructure
 
 ### 3.1 Deployment Infrastructure (Netlify)
@@ -302,6 +352,23 @@ binaryConverterSchema.superRefine((data, ctx) => {
    - Focus management with `useFormHelpers`
    - Semantic HTML
 
+### 3.4 Tool Registry System
+
+**Location:** `src/lib/tools.ts`
+
+**Purpose:**
+- Centralized catalog of all converter tools
+- Single source of truth for tool metadata
+- Powers navigation, search, and home page
+
+**Features:**
+- Tool interface with `id`, `name`, `description`, `category`, `icon`, `to`, `tags`
+- Search functionality across all metadata fields
+- Category-based filtering
+- Auto-generation of navigation from tools array
+
+**Current Tools:** 4 (Binary, Base64, Hexadecimal, URL Encoder)
+
 ---
 
 ## 4. Development Patterns & Best Practices
@@ -319,17 +386,30 @@ binaryConverterSchema.superRefine((data, ctx) => {
      pendingComponent: LoaderPending,
    })
 
-   // 2. Create page component with useConverterForm
+   // 2. Create page component with both hooks
    const { form, output, setOutput, handleReset, encodingOptions } = useConverterForm({
      validationSchema: { onChange: myToolSchema },
      defaultValues: { ... },
      onSubmit: async (value) => { ... },
    })
 
+   const { registerInputRef, focusFirstError } = useFormHelpers(form)
+
    // 3. Create validation schema with conditional logic
    export const myToolSchema = z.object({ ... }).superRefine((data, ctx) => {
      // Mode-specific validation
    })
+
+   // 4. Register tool in src/lib/tools.ts
+   {
+     id: 'my-tool',
+     name: 'My Tool',
+     description: '...',
+     category: 'Encoders',
+     icon: MyIcon,
+     to: '/converters/my-tool',
+     tags: ['tag1', 'tag2'],
+   }
    ```
 
 2. **Form Component Composition**
@@ -338,7 +418,7 @@ binaryConverterSchema.superRefine((data, ctx) => {
    - Focus management with `useFormHelpers`
 
 3. **Encoding Operations**
-   - Use namespaced exports (`Binary.fromText`, `Base64.encode`, etc.)
+   - Use namespaced exports (`Binary.fromText`, `Base64.encode`, `URLEncode.encode`, etc.)
    - Always validate input before processing
    - Handle errors with try-catch and user-friendly messages
    - Prefer UTF-8 fast path when possible
@@ -350,32 +430,49 @@ binaryConverterSchema.superRefine((data, ctx) => {
 - **Reusability:** Extract common patterns to hooks and components
 - **Type Safety:** Leverage TypeScript for correctness
 - **Performance:** Lazy load heavy dependencies, code split routes
+- **Tool Registry:** Register all tools in central catalog for discoverability
 
 ---
 
 ## 5. Phased Feature Roadmap
 
-### **Phase 1: Enhanced Encoding Tools** (Estimated: 3-4 weeks)
+### **Phase 1: Enhanced Encoding Tools**
 
 **Objective:** Expand encoding capabilities with URL and JSON tools
+**Status:** 1 of 3 features complete (33%)
 
-#### Feature 1.1: URL Encoder/Decoder
+---
+
+#### Feature 1.1: URL Encoder/Decoder ✅ COMPLETE
+
 **Priority:** High
 **Complexity:** Low
-**Dependencies:** None
+**Status:** ✅ **COMPLETE** (December 27, 2025)
+**Implementation:** `src/routes/converters/url-encoder.tsx`, `src/pages/URLEncoder.tsx`
 
 **Requirements:**
-- Encode/decode URL components (encodeURIComponent/decodeURIComponent)
-- Full URL encoding (encodeURI/decodeURI)
-- Support for query string parsing and building
-- Validation for malformed URLs
+- ✅ Encode/decode URL components (encodeURIComponent/decodeURIComponent)
+- ✅ Full URL encoding (encodeURI/decodeURI)
+- ✅ Support for query string parsing and building
+- ✅ Validation for malformed URLs
+- ✅ 80+ character encoding support
 
-**Implementation Notes:**
+**Implementation Details:**
 - Route: `src/routes/converters/url-encoder.tsx`
 - Page: `src/pages/URLEncoder.tsx`
-- Lib: Add `URL` namespace to `src/lib/encoding.ts`
-- Schema: `urlEncoderSchema` with URL format validation
-- No iconv-lite needed (native browser APIs)
+- Lib: Added `URLEncode` namespace to `src/lib/encoding.ts` with 4 functions:
+  - `encode()` - Encode text to URL format
+  - `decode()` - Decode URL-encoded string
+  - `parseQuery()` - Parse query strings into key-value pairs
+  - `buildQuery()` - Build query strings from objects
+- Schema: `urlEncoderSchema` with URL format validation in `src/lib/validation-schemas.ts`
+- Tool Registry: Added to `src/lib/tools.ts` with Link icon
+- Uses native browser APIs for UTF-8, iconv-lite for other encodings
+
+**Performance:**
+- Bundle Size: ~3.35 kB (gzipped: 1.31 kB)
+- UTF-8 encoding: Native browser APIs (instant)
+- Other encodings: iconv-lite (lazy loaded, shared)
 
 **Acceptance Criteria:**
 - ✅ Encode/decode URL components
@@ -383,12 +480,23 @@ binaryConverterSchema.superRefine((data, ctx) => {
 - ✅ Parse query strings into key-value pairs
 - ✅ Build URLs from components
 - ✅ Validate URL format before decoding
+- ✅ Multi-encoding support (80+ encodings)
+
+**Documentation:** See `docs/feature-1.1-url-encoder-implementation.md`
+
+**Next Steps:**
+1. ✅ Manual testing of all functionality
+2. ✅ User acceptance testing
+3. Deploy to production (Netlify)
+4. **Begin Feature 1.2: JSON Formatter & Validator** ⬅️ NEXT
 
 ---
 
 #### Feature 1.2: JSON Formatter & Validator
+
 **Priority:** High
 **Complexity:** Medium
+**Status:** ⏳ **PENDING** (Next in queue)
 **Dependencies:** None
 
 **Requirements:**
@@ -412,13 +520,15 @@ binaryConverterSchema.superRefine((data, ctx) => {
 - ✅ Validate JSON with line/column error reporting
 - ✅ Sort keys alphabetically
 - ✅ Escape/unescape JSON strings
-- ✅ Syntax highlighting (optional enhancement)
+- ⚠️ Syntax highlighting (optional enhancement)
 
 ---
 
 #### Feature 1.3: Hash Generators (MD5, SHA-256, SHA-512)
+
 **Priority:** Medium
 **Complexity:** Low
+**Status:** ⏳ **PENDING**
 **Dependencies:** `crypto-js` or Web Crypto API
 
 **Requirements:**
@@ -449,6 +559,7 @@ binaryConverterSchema.superRefine((data, ctx) => {
 ### **Phase 2: Developer Utilities** (Estimated: 4-5 weeks)
 
 **Objective:** Add essential developer tools for authentication, testing, and data generation
+**Status:** ⏳ **NOT STARTED**
 
 #### Feature 2.1: JWT Decoder & Validator
 **Priority:** High
@@ -483,7 +594,7 @@ binaryConverterSchema.superRefine((data, ctx) => {
 #### Feature 2.2: UUID Generator
 **Priority:** Medium
 **Complexity:** Low
-**Dependencies:** `uuid` library
+**Dependencies:** `uuid` library or native `crypto.randomUUID()`
 
 **Requirements:**
 - Generate UUIDv4 (random)
@@ -570,6 +681,7 @@ binaryConverterSchema.superRefine((data, ctx) => {
 ### **Phase 3: Enhanced User Experience** (Estimated: 3-4 weeks)
 
 **Objective:** Improve usability, accessibility, and user experience with dark mode, history, and favorites
+**Status:** ⏳ **NOT STARTED**
 
 #### Feature 3.1: Dark Mode
 **Priority:** High
@@ -668,7 +780,7 @@ binaryConverterSchema.superRefine((data, ctx) => {
 
 **Implementation Notes:**
 - Update `src/pages/Home.tsx` with tool grid
-- Create `src/lib/navigation.ts` with tool metadata
+- Use existing `src/lib/tools.ts` registry and `src/lib/navigation.ts`
 - Add search functionality with fuzzy matching
 - Display icons from lucide-react
 
@@ -684,6 +796,7 @@ binaryConverterSchema.superRefine((data, ctx) => {
 ### **Phase 4: Progressive Web App & Offline Support** (Estimated: 2-3 weeks)
 
 **Objective:** Transform DevKit into an installable PWA with offline functionality
+**Status:** ⏳ **NOT STARTED**
 
 #### Feature 4.1: PWA Configuration
 **Priority:** High
@@ -830,7 +943,7 @@ binaryConverterSchema.superRefine((data, ctx) => {
 | Risk | Severity | Probability | Mitigation |
 |------|----------|-------------|------------|
 | **Scope Creep** | Medium | High | Stick to phased plan, prioritize features, defer low-value items |
-| **Inconsistent UX** | Medium | Medium | Reuse existing patterns (`useConverterForm`), design system |
+| **Inconsistent UX** | Medium | Medium | Reuse existing patterns (`useConverterForm`, `useFormHelpers`), design system |
 | **Maintenance Burden** | Low | Medium | Document code, write tests (future), automate with CI/CD |
 
 ---
@@ -854,18 +967,20 @@ binaryConverterSchema.superRefine((data, ctx) => {
 
 ## 9. Conclusion
 
-DevKit is built on a solid architectural foundation with modern technologies, excellent type safety, and performance optimizations. The current implementation of three converters demonstrates best practices in component composition, form handling, and lazy loading.
+DevKit is built on a solid architectural foundation with modern technologies, excellent type safety, and performance optimizations. The current implementation of four converters demonstrates best practices in component composition, form handling, and lazy loading.
 
 **Strengths:**
 - ✅ Type-safe architecture (TypeScript + Zod + TanStack Router)
 - ✅ Performance-optimized (code splitting, lazy loading, caching)
 - ✅ Accessible UI (React Aria Components)
 - ✅ Production-ready deployment (Netlify with security headers)
-- ✅ Reusable patterns (`useConverterForm`, form components)
+- ✅ Reusable patterns (`useConverterForm`, `useFormHelpers`, form components)
 - ✅ Comprehensive validation and error handling
+- ✅ Tool registry system for discoverability
+- ✅ Phase 1 Progress: Feature 1.1 Complete (URL Encoder/Decoder)
 
 **Opportunities:**
-- 📈 Expand tool library from 3 to 20+ tools across 4 phases
+- 📈 Expand tool library from 4 to 20+ tools across 4 phases
 - 🎨 Enhance UX with dark mode, history, favorites
 - 📱 Transform into installable PWA with offline support
 - 🌍 Add internationalization for global reach
@@ -873,7 +988,7 @@ DevKit is built on a solid architectural foundation with modern technologies, ex
 **Recommended Approach:**
 1. Execute phases sequentially to maintain quality
 2. Reuse established patterns for new tools (faster development)
-3. Prioritize high-value tools first (URL encoder, JSON formatter, JWT decoder)
+3. Prioritize high-value tools first (JSON formatter next, then JWT decoder)
 4. Continuously monitor performance metrics
 5. Maintain 100% type safety and accessibility standards
 
@@ -881,12 +996,31 @@ By following this phased roadmap, DevKit will evolve from a focused encoding too
 
 ---
 
+## 10. Progress Tracking
+
+### Phase 1: Enhanced Encoding Tools
+- ✅ Feature 1.1: URL Encoder/Decoder (COMPLETE - Dec 27, 2025)
+- ⏳ Feature 1.2: JSON Formatter & Validator (NEXT)
+- ⏳ Feature 1.3: Hash Generators
+
+**Phase 1 Progress:** 33% complete (1 of 3 features)
+
+### Phases 2-4
+- ⏳ Phase 2: Developer Utilities (NOT STARTED)
+- ⏳ Phase 3: Enhanced User Experience (NOT STARTED)
+- ⏳ Phase 4: PWA & Offline Support (NOT STARTED)
+
+**Overall Roadmap Progress:** 8% complete (1 of 12 features across all phases)
+
+---
+
 **Next Steps:**
-1. Review and approve this roadmap
-2. Begin Phase 1 with URL Encoder (quickest win)
-3. Establish testing strategy (unit tests for `src/lib`)
-4. Set up CI/CD pipeline (GitHub Actions + Netlify)
-5. Create design system documentation for consistency
+1. ✅ Review and approve Feature 1.1 completion
+2. **Begin Feature 1.2: JSON Formatter & Validator** ⬅️ IMMEDIATE NEXT
+3. Continue Phase 1 implementation
+4. Establish testing strategy (unit tests for `src/lib`)
+5. Set up CI/CD pipeline (GitHub Actions + Netlify)
+6. Create design system documentation for consistency
 
 ---
 
