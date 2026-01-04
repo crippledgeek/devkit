@@ -4,21 +4,22 @@
 
 DevKit is a blazingly fast, beautifully crafted collection of essential developer tools. Convert, encode, decode, and transform data with ease—all in one sleek web application.
 
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?logo=typescript)](https://www.typescriptlang.org/)
-[![React](https://img.shields.io/badge/React-18-61dafb?logo=react)](https://reactjs.org/)
-[![Vite](https://img.shields.io/badge/Vite-5-646cff?logo=vite)](https://vitejs.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue?logo=typescript)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-19-61dafb?logo=react)](https://reactjs.org/)
+[![Vite](https://img.shields.io/badge/Vite-7-646cff?logo=vite)](https://vitejs.dev/)
 [![TailwindCSS](https://img.shields.io/badge/Tailwind-4-38bdf8?logo=tailwindcss)](https://tailwindcss.com/)
 
 ---
 
 ## ✨ Features
 
-- **🔄 Text ↔ Binary Converter—**Encode and decode text to/from binary with multiple character encodings
-- **🎨 Multiple Encodings—**Support for UTF-8, Latin1, Shift-JIS, GBK, and more
-- **⚡ Lightning Fast—**Built with Vite for instant hot module replacement
+- **🔄 Multiple Converters** - Binary, Base64, Hexadecimal, and URL encoding/decoding
+- **🎨 80+ Encodings** - UTF-8, Latin1, Shift-JIS, GBK, ISO-8859, Windows-125x, and more
+- **🌙 Dark Mode** - Beautiful dark theme with system preference detection
+- **⚡ Lightning Fast** - Built with Vite for instant hot module replacement
 - **🎯 Type-Safe** - 100% TypeScript for bulletproof code
-- **📱 Responsive—**Beautiful UI that works on all devices
-- **🌙 Coming Soon—**Dark mode, JWT tools, hash generators, and more!
+- **📱 Responsive** - Beautiful UI that works on all devices
+- **♿ Accessible** - Built with React Aria Components for WCAG compliance
 
 ---
 
@@ -53,16 +54,17 @@ Visit `http://localhost:5173` and start converting! 🎉
 
 DevKit is built with modern, cutting-edge technologies:
 
-- **⚛️ React 18—**UI library
-- **🎯 TypeScript—**Type safety
-- **⚡ Vite** - Build tool & dev server
-- **🎨 Tailwind CSS v4—**Styling
-- **🧭 TanStack Router** - Type-safe routing
-- **📝 TanStack Form—**Powerful form management
-- **🔍 TanStack Query—**Data fetching and caching
-- **🎭 React Aria Components** - Accessible UI primitives
-- **🎪 JollyUI** - Beautiful component library
-- **🔤 iconv-lite** - Character encoding support
+- **⚛️ React 19** - UI library
+- **🎯 TypeScript 5.9** - Type safety
+- **⚡ Vite 7** - Build tool & dev server
+- **🎨 Tailwind CSS v4** - Utility-first styling
+- **🧭 TanStack Router** - Type-safe file-based routing
+- **📝 TanStack Form** - Powerful form management with validation
+- **🔍 TanStack Query** - Data fetching and caching
+- **🎭 React Aria Components** - Accessible UI primitives (WCAG compliant)
+- **🔤 iconv-lite** - 80+ character encoding support
+- **🎨 Class Variance Authority** - Component variant system
+- **✅ Zod** - Schema validation
 
 ---
 
@@ -88,18 +90,29 @@ devkit/
 
 ## 🎯 Roadmap
 
+### ✅ Completed
 - [x] Text to Binary Converter
-- [x] Multi-encoding support
+- [x] Base64 Encoder/Decoder
+- [x] Hexadecimal Encoder/Decoder
+- [x] URL Encoder/Decoder
+- [x] Multi-encoding support (80+ encodings)
 - [x] Composable form components
+- [x] Dark Mode with system preference
+- [x] Type-safe routing with TanStack Router
+- [x] Accessible UI with React Aria
+
+### 🚧 In Progress
+- [ ] Conversion History
+- [ ] Favorites / Bookmarks
+- [ ] Improved Home Page
+
+### 📋 Planned
 - [ ] JWT Decoder & Validator
-- [ ] Base64 Encoder/Decoder
 - [ ] Hash Generators (MD5, SHA-256, etc.)
-- [ ] URL Encoder/Decoder
 - [ ] JSON Formatter & Validator
 - [ ] Regex Tester
 - [ ] UUID Generator
 - [ ] Color Converter
-- [ ] Dark Mode
 - [ ] PWA Support
 - [ ] Offline Mode
 
