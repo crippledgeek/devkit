@@ -16,35 +16,24 @@ Successfully implemented Dark Mode as defined in the architecture and feature ro
 
 ### Files Created
 
-1. **`src/contexts/DarkModeContext.tsx`**
-   - React Context for dark mode state management
-   - Uses `useDarkMode` hook from `usehooks-ts` library
-   - Provides type-safe context with `useDarkModeContext()` hook
-   - Automatic localStorage persistence with key `devkit-dark-mode`
-   - System preference detection on first visit
-
-2. **`src/contexts/index.ts`**
-   - Barrel export for contexts directory
-   - Exports `DarkModeProvider` and `useDarkModeContext`
+1. **`src/hooks/useThemeController.ts`**
+   - Custom hook encapsulating dark mode logic
+   - Uses `useDarkMode` from `usehooks-ts` for state and localStorage
+   - Uses `useIsomorphicLayoutEffect` for SSR-safe DOM updates before paint
+   - Uses `useMediaQuery` for system preference detection
+   - Applies `.dark` class and `data-theme` attribute to `document.documentElement`
+   - Provides `setTheme(mode: ThemeMode)` API for explicit theme control
+   - Returns `{ isDark, setTheme }`
 
 ### Files Updated
 
-3. **`src/components/Providers.tsx`**
-   - Integrated `DarkModeProvider` into app context hierarchy
-   - Wraps children with dark mode context
-
-4. **`src/components/Header.tsx`**
+2. **`src/components/Header.tsx`**
    - Added Sun/Moon toggle button using Lucide React icons
-   - Uses `useDarkModeContext()` to access dark mode state
+   - Imports `useThemeController` hook directly (no context needed)
+   - Uses `isDark` and `setTheme` for theme management
    - Accessible button with proper aria-labels
    - Smooth transition animations on icon change
-   - Positioned between navigation and mobile menu
-
-5. **`CLAUDE.md`**
-   - Added Dark Mode System section with full documentation
-   - Updated State Management section to reference dark mode
-   - Updated Layout components to mention dark mode toggle
-   - Updated Providers description
+   - Positioned on the right side with navigation menu and mobile menu
 
 ### Existing CSS (No Changes Needed)
 
@@ -66,12 +55,13 @@ Successfully implemented Dark Mode as defined in the architecture and feature ro
 - [x] Class-based dark mode strategy (`.dark` class on document)
 
 ### ✅ Technical Implementation
-- [x] Context-based state management
+- [x] Hook-based state management (simpler than context pattern)
 - [x] TypeScript strict mode compliance
 - [x] No compilation errors
-- [x] Follows established patterns (Context + Provider)
+- [x] SSR-safe with `useIsomorphicLayoutEffect`
 - [x] Accessible toggle button with aria-labels
 - [x] Smooth icon transitions
+- [x] System preference detection with `useMediaQuery`
 
 ### ✅ User Experience
 - [x] Intuitive toggle button in header
@@ -84,40 +74,51 @@ Successfully implemented Dark Mode as defined in the architecture and feature ro
 
 ## API Design
 
-### DarkModeContext API
+### useThemeController Hook API
 
 ```typescript
-// Context Value Interface
-interface DarkModeContextValue {
-  isDarkMode: boolean
-  toggle: () => void
-  enable: () => void
-  disable: () => void
+// Type Definition
+export type ThemeMode = "light" | "dark" | "system"
+
+// Hook Return Type
+interface ThemeController {
+  isDark: boolean       // Current dark mode state (resolved)
+  setTheme: (mode: ThemeMode) => void
 }
 
 // Usage in Components
-import { useDarkModeContext } from '@/contexts'
+import { useThemeController } from '@/hooks/useThemeController'
 
 function MyComponent() {
-  const { isDarkMode, toggle, enable, disable } = useDarkModeContext()
+  const { isDark, setTheme } = useThemeController()
 
   // Use dark mode state
-  if (isDarkMode) {
+  if (isDark) {
     // Dark mode specific logic
   }
 
   // Toggle dark mode
-  <button onClick={toggle}>Toggle Dark Mode</button>
+  const handleToggle = () => setTheme(isDark ? 'light' : 'dark')
+
+  // Set specific theme
+  <button onClick={() => setTheme('dark')}>Dark Mode</button>
+  <button onClick={() => setTheme('light')}>Light Mode</button>
+  <button onClick={() => setTheme('system')}>System Preference</button>
 }
 ```
 
 ### Hook Configuration
 
 ```typescript
+// Internal configuration (in useThemeController.ts)
 useDarkMode({
   localStorageKey: 'devkit-dark-mode',
   initializeWithValue: true,
 })
+
+useIsomorphicLayoutEffect(() => {
+  apply(isDark)  // Apply .dark class and data-theme attribute
+}, [isDark])
 ```
 
 ---
@@ -169,7 +170,8 @@ All colors use the oklch color space for perceptual uniformity.
 - **Dependencies:** `usehooks-ts` (already in project)
 - **Initial Load:** Instant (reads from localStorage or system preference)
 - **Toggle Performance:** Instant (CSS class change only)
-- **Memory:** Minimal (single context value)
+- **Memory:** Minimal (no context overhead, hook-based)
+- **Re-renders:** Optimized (components only re-render when using the hook)
 
 ---
 
@@ -201,18 +203,36 @@ Uses standard Web APIs supported by all modern browsers:
 
 ## Implementation Pattern
 
-This implementation establishes a pattern for future context-based features:
+This implementation establishes a hook-based pattern for app-wide features:
 
-1. **Create Context**: `src/contexts/[FeatureName]Context.tsx`
-2. **Export via Index**: Add to `src/contexts/index.ts`
-3. **Integrate Provider**: Add to `src/components/Providers.tsx`
-4. **Use Hook**: Import `use[FeatureName]Context` in components
-5. **Document**: Update CLAUDE.md with section
+1. **Create Custom Hook**: `src/hooks/use[FeatureName].ts`
+   - Encapsulate all state management logic
+   - Use composition of smaller hooks (useDarkMode, useMediaQuery, etc.)
+   - Handle DOM updates with `useIsomorphicLayoutEffect` for SSR safety
+   - Return minimal, focused API
+
+2. **Direct Hook Usage**: Import hook directly in components (no context needed)
+   - Simpler than context pattern for stateless features
+   - Better performance (no unnecessary re-renders)
+   - Easier to test and maintain
+
+3. **Document**: Update development documentation with hook API and usage patterns
+
+### When to Use Context vs Hook Pattern
+
+**Use Hook Pattern (like Dark Mode):**
+- Feature doesn't need to share state between components
+- Each component can independently access the same localStorage/API
+- State is derived from browser APIs (localStorage, mediaQuery)
+
+**Use Context Pattern:**
+- State needs to be shared and synchronized across components
+- State changes in one component should trigger updates in others
+- Complex state management with reducers
 
 This pattern can be reused for:
-- Favorites/Bookmarks context (Feature 3.3)
-- Conversion History context (Feature 3.2)
-- Future stateful features
+- Similar browser API-based features
+- Features with independent state access per component
 
 ---
 
@@ -233,12 +253,14 @@ This implementation completes **Feature 3.1** from Phase 3 of the roadmap:
 The Dark Mode feature has been successfully implemented following all established patterns and best practices. The implementation:
 
 - ✅ Uses industry-standard library (`usehooks-ts`)
-- ✅ Follows React Context pattern for global state
+- ✅ Follows clean hook-based pattern (simpler than context)
+- ✅ SSR-safe with `useIsomorphicLayoutEffect`
 - ✅ Maintains type safety and code quality
 - ✅ Provides excellent UX with persistence and system preference
 - ✅ Integrates seamlessly with existing Tailwind setup
 - ✅ Maintains performance standards (no bundle increase)
 - ✅ Accessible and keyboard-friendly
+- ✅ Right-aligned navigation menu with dark mode toggle
 
 **Status:** Ready for production deployment
 
