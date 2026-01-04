@@ -35,43 +35,42 @@ import { useThemeController } from '@/hooks/useThemeController'
                     <Logo />
                 </RouterLink>
 
-                {/* Desktop Navigation */}
-                <div className="hidden md:flex md:items-center md:gap-6" aria-label="Desktop navigation">
-                    {navigation.map((item) =>
-                        item.children ? (
-                            <MenuTrigger key={item.name}>
-                                <Button variant="ghost" className="text-sm font-medium">
-                                    {item.name}
-                                </Button>
-                                <MenuPopover>
-                                    <Menu aria-label={item.name}>
-                                        {item.children.map((child) => (
-                                            <MenuItemLink
-                                                key={child.name}
-                                                to={child.to}
-                                                className="w-full text-left"
-                                            >
-                                                {child.name}
-                                            </MenuItemLink>
-                                        ))}
-                                    </Menu>
-                                </MenuPopover>
-                            </MenuTrigger>
-                        ) : (
-                            <RouterLink
-                                key={item.name}
-                                to={item.to}
-                                className="text-sm font-medium transition-colors hover:text-primary"
-                                activeProps={{ className: "text-primary" }}
-                            >
-                                {item.name}
-                            </RouterLink>
-                        )
-                    )}
-                </div>
-
-                {/* Dark Mode Toggle & Mobile Menu */}
+                {/* Desktop Navigation & Dark Mode Toggle */}
                 <div className="flex items-center gap-2">
+                    <div className="hidden md:flex md:items-center md:gap-6" aria-label="Desktop navigation">
+                        {navigation.map((item) =>
+                            item.children ? (
+                                <MenuTrigger key={item.name}>
+                                    <Button variant="ghost" className="text-sm font-medium">
+                                        {item.name}
+                                    </Button>
+                                    <MenuPopover>
+                                        <Menu aria-label={item.name}>
+                                            {item.children.map((child) => (
+                                                <MenuItemLink
+                                                    key={child.name}
+                                                    to={child.to}
+                                                    className="w-full text-left"
+                                                >
+                                                    {child.name}
+                                                </MenuItemLink>
+                                            ))}
+                                        </Menu>
+                                    </MenuPopover>
+                                </MenuTrigger>
+                            ) : (
+                                <RouterLink
+                                    key={item.name}
+                                    to={item.to}
+                                    className="text-sm font-medium transition-colors hover:text-primary"
+                                    activeProps={{ className: "text-primary" }}
+                                >
+                                    {item.name}
+                                </RouterLink>
+                            )
+                        )}
+                    </div>
+
                     {/* Dark Mode Toggle */}
                     <Button
                         aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
