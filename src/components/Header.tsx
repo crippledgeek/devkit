@@ -10,13 +10,9 @@ import {
 } from '@/components/ui/menu'
 import { navigation } from '@/lib/navigation'
 import Logo from '@/components/Logo'
-import type {FC} from "react";
 import { useThemeController } from '@/hooks/useThemeController'
 
- type HeaderProps = object
-
-
- const Header: FC<HeaderProps> = () => {
+function Header() {
     const { isDark, setTheme } = useThemeController()
 
     const handleToggle = () => {

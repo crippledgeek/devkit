@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { z, type RefinementCtx } from 'zod'
 
 /**
  * Maximum input size (10MB)
@@ -114,123 +114,6 @@ export const hexStringSchema = z
     )
 
 /**
- * Delimiter validation
- */
-const delimiterSchema = z.string()
-
-/**
- * Mode validation
- */
-const modeSchema = z.enum(['encode', 'decode'])
-
-/**
- * Schema for Binary converter form
- */
-export const binaryConverterSchema = z.object({
-    mode: modeSchema,
-    encoding: encodingSchema,
-    delimiter: delimiterSchema,
-    input: z.string(),
-}).superRefine((data, ctx) => {
-    // Conditional validation based on mode
-    if (data.mode === 'encode') {
-        const result = baseInputValidation.safeParse(data.input)
-        if (!result.success) {
-            result.error.issues.forEach(issue => {
-                ctx.addIssue({
-                    ...issue,
-                    path: ['input'],
-                })
-            })
-        }
-    } else {
-        const result = binaryStringSchema.safeParse(data.input)
-        if (!result.success) {
-            result.error.issues.forEach(issue => {
-                ctx.addIssue({
-                    ...issue,
-                    path: ['input'],
-                })
-            })
-        }
-    }
-})
-
-/**
- * Schema for Base64 converter form
- */
-export const base64ConverterSchema = z.object({
-    mode: modeSchema,
-    encoding: encodingSchema,
-    input: z.string(),
-}).superRefine((data, ctx) => {
-    // Conditional validation based on mode
-    if (data.mode === 'encode') {
-        const result = baseInputValidation.safeParse(data.input)
-        if (!result.success) {
-            result.error.issues.forEach(issue => {
-                ctx.addIssue({
-                    ...issue,
-                    path: ['input'],
-                })
-            })
-        }
-    } else {
-        const result = base64StringSchema.safeParse(data.input)
-        if (!result.success) {
-            result.error.issues.forEach(issue => {
-                ctx.addIssue({
-                    ...issue,
-                    path: ['input'],
-                })
-            })
-        }
-    }
-})
-
-/**
- * Schema for Hexadecimal converter form
- */
-export const hexConverterSchema = z.object({
-    mode: modeSchema,
-    encoding: encodingSchema,
-    uppercase: z.string(),
-    delimiter: delimiterSchema,
-    input: z.string(),
-}).superRefine((data, ctx) => {
-    // Conditional validation based on mode
-    if (data.mode === 'encode') {
-        const result = baseInputValidation.safeParse(data.input)
-        if (!result.success) {
-            result.error.issues.forEach(issue => {
-                ctx.addIssue({
-                    ...issue,
-                    path: ['input'],
-                })
-            })
-        }
-    } else {
-        const result = hexStringSchema.safeParse(data.input)
-        if (!result.success) {
-            result.error.issues.forEach(issue => {
-                ctx.addIssue({
-                    ...issue,
-                    path: ['input'],
-                })
-            })
-        }
-    }
-})
-
-/**
- * Type exports
- */
-export type BinaryConverterForm = z.infer<typeof binaryConverterSchema>
-export type Base64ConverterForm = z.infer<typeof base64ConverterSchema>
-export type HexConverterForm = z.infer<typeof hexConverterSchema>
-export type URLEncoderForm = z.infer<typeof urlEncoderSchema>
-
-/**
  * URL-encoded string validation
  */
 export const urlEncodedStringSchema = z
@@ -250,6 +133,65 @@ export const urlEncodedStringSchema = z
     )
 
 /**
+ * Delimiter validation
+ */
+const delimiterSchema = z.string()
+
+/**
+ * Mode validation
+ */
+const modeSchema = z.enum(['encode', 'decode'])
+
+/**
+ * Validate input conditionally based on encode/decode mode.
+ * In encode mode, validates against baseInputValidation.
+ * In decode mode, validates against the provided decode schema.
+ */
+function conditionalInputValidation(
+    decodeSchema: z.ZodType<string>,
+) {
+    return (data: { mode: string; input: string }, ctx: RefinementCtx) => {
+        const schema = data.mode === 'encode' ? baseInputValidation : decodeSchema
+        const result = schema.safeParse(data.input)
+        if (!result.success) {
+            for (const issue of result.error.issues) {
+                ctx.addIssue({ ...issue, path: ['input'] })
+            }
+        }
+    }
+}
+
+/**
+ * Schema for Binary converter form
+ */
+export const binaryConverterSchema = z.object({
+    mode: modeSchema,
+    encoding: encodingSchema,
+    delimiter: delimiterSchema,
+    input: z.string(),
+}).superRefine(conditionalInputValidation(binaryStringSchema))
+
+/**
+ * Schema for Base64 converter form
+ */
+export const base64ConverterSchema = z.object({
+    mode: modeSchema,
+    encoding: encodingSchema,
+    input: z.string(),
+}).superRefine(conditionalInputValidation(base64StringSchema))
+
+/**
+ * Schema for Hexadecimal converter form
+ */
+export const hexConverterSchema = z.object({
+    mode: modeSchema,
+    encoding: encodingSchema,
+    uppercase: z.string(),
+    delimiter: delimiterSchema,
+    input: z.string(),
+}).superRefine(conditionalInputValidation(hexStringSchema))
+
+/**
  * URL Encoder form schema
  */
 export const urlEncoderSchema = z.object({
@@ -257,27 +199,12 @@ export const urlEncoderSchema = z.object({
     encoding: encodingSchema,
     encodingMode: z.enum(['component', 'full']),
     input: z.string(),
-}).superRefine((data, ctx) => {
-    // Conditional validation based on mode
-    if (data.mode === 'encode') {
-        const result = baseInputValidation.safeParse(data.input)
-        if (!result.success) {
-            result.error.issues.forEach(issue => {
-                ctx.addIssue({
-                    ...issue,
-                    path: ['input'],
-                })
-            })
-        }
-    } else {
-        const result = urlEncodedStringSchema.safeParse(data.input)
-        if (!result.success) {
-            result.error.issues.forEach(issue => {
-                ctx.addIssue({
-                    ...issue,
-                    path: ['input'],
-                })
-            })
-        }
-    }
-})
+}).superRefine(conditionalInputValidation(urlEncodedStringSchema))
+
+/**
+ * Type exports
+ */
+export type BinaryConverterForm = z.infer<typeof binaryConverterSchema>
+export type Base64ConverterForm = z.infer<typeof base64ConverterSchema>
+export type HexConverterForm = z.infer<typeof hexConverterSchema>
+export type URLEncoderForm = z.infer<typeof urlEncoderSchema>

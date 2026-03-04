@@ -1,23 +1,8 @@
 import { Hex, isValidEncoding } from '@/lib/encoding'
-import { FormButton, FormSelect, FormTextArea } from '@/components/form'
+import { FieldErrorMessage, FormButton, FormSelect, FormTextArea } from '@/components/form'
 import { useConverterForm } from '@/hooks/useConverterForm'
 import { useFormHelpers } from '@/hooks/useFormHelpers'
 import { hexConverterSchema, type HexConverterForm } from '@/lib/validation-schemas'
-import { formatFieldErrors } from '@/lib/errors'
-
-function FieldError({
-    meta,
-    showWhenSubmitted,
-}: {
-    meta: { isTouched?: boolean; isBlurred?: boolean; errors?: unknown[] }
-    showWhenSubmitted: boolean
-}) {
-    const shouldShow = meta.isTouched || meta.isBlurred || showWhenSubmitted
-    const errs = meta.errors ?? []
-    return shouldShow && errs.length > 0 ? (
-        <em className="text-red-500 text-sm">{formatFieldErrors(errs)}</em>
-    ) : null
-}
 
 export default function TextHexConverter() {
     const { encode, decode } = Hex
@@ -97,7 +82,7 @@ export default function TextHexConverter() {
                                         { value: 'decode', label: 'Decode (Hex → Text)' },
                                     ]}
                                 />
-                                <FieldError
+                                <FieldErrorMessage
                                     meta={field.state.meta}
                                     showWhenSubmitted={form.state.isSubmitted}
                                 />
@@ -118,7 +103,7 @@ export default function TextHexConverter() {
                                 onChange={(value) => field.setValue(value)}
                                 options={encodingOptions}
                             />
-                            <FieldError
+                            <FieldErrorMessage
                                 meta={field.state.meta}
                                 showWhenSubmitted={form.state.isSubmitted}
                             />
@@ -139,7 +124,7 @@ export default function TextHexConverter() {
                                     onChange={(value) => field.setValue(value)}
                                     options={caseOptions}
                                 />
-                                <FieldError
+                                <FieldErrorMessage
                                     meta={field.state.meta}
                                     showWhenSubmitted={form.state.isSubmitted}
                                 />
@@ -160,7 +145,7 @@ export default function TextHexConverter() {
                                 onChange={(value) => field.setValue(value)}
                                 options={delimiterOptions}
                             />
-                            <FieldError
+                            <FieldErrorMessage
                                 meta={field.state.meta}
                                 showWhenSubmitted={form.state.isSubmitted}
                             />
@@ -183,7 +168,7 @@ export default function TextHexConverter() {
                                 onChange={(e) => field.handleChange(e)}
                                 className={form.state.values.mode === 'decode' ? 'font-mono' : undefined}
                             />
-                            <FieldError
+                            <FieldErrorMessage
                                 meta={field.state.meta}
                                 showWhenSubmitted={form.state.isSubmitted}
                             />

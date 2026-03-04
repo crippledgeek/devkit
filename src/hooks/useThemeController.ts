@@ -24,24 +24,9 @@ export function useThemeController() {
         apply(isDark);
     }, [isDark]);
 
-    /**
-     * Public API
-     * - "dark"   → force dark
-     * - "light"  → force light
-     * - "system" → follow OS
-     */
     const setTheme = (mode: ThemeMode) => {
-        if (mode === "dark") {
-            enable();
-        } else if (mode === "light") {
-            disable();
-        } else {
-            if (systemDark) {
-                enable();
-            } else {
-                disable();
-            }
-        }
+        const dark = mode === "dark" || (mode === "system" && systemDark);
+        if (dark) enable(); else disable();
     };
 
     return {setTheme, isDark}
