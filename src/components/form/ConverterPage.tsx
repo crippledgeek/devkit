@@ -1,6 +1,6 @@
 import { useStore } from '@tanstack/react-form'
 import { useConverterForm } from '@/hooks/useConverterForm'
-import type { ConverterConfig, ConverterFormBase, SelectOption } from '@/lib/converter-configs'
+import type { ConverterConfig, ConverterFormBase, ConverterMode, SelectOption } from '@/lib/converter-configs'
 import { FormTextArea } from './FormTextArea'
 
 interface ConverterPageProps<T extends ConverterFormBase> {
@@ -21,7 +21,7 @@ export function ConverterPage<T extends ConverterFormBase>({
     } = useConverterForm(config)
 
     // Selective subscription: only re-render when mode changes
-    const mode: string = useStore(form.store, (state) => state.values.mode)
+    const mode: ConverterMode = useStore(form.store, (state) => state.values.mode)
 
     return (
         <div className="max-w-4xl mx-auto">
@@ -44,20 +44,12 @@ export function ConverterPage<T extends ConverterFormBase>({
                     )
                     if (!visible) return null
 
-                    // Resolve dynamic properties
                     const resolvedLabel = field.isInput
                         ? config.inputLabel(mode)
                         : field.label
-                    const resolvedPlaceholder =
-                        typeof field.placeholder === 'function'
-                            ? field.placeholder(mode)
-                            : field.placeholder
-                    const resolvedClassName =
-                        typeof field.className === 'function'
-                            ? field.className(mode)
-                            : field.className
 
                     if (field.type === 'select') {
+                        // TypeScript narrows to SelectFieldConfig here
                         const resolvedOptions: SelectOption[] =
                             field.options === 'encodings'
                                 ? encodingOptions
@@ -81,7 +73,16 @@ export function ConverterPage<T extends ConverterFormBase>({
                         )
                     }
 
-                    // textarea
+                    // Resolve textarea-specific dynamic properties (narrowed to TextAreaFieldConfig)
+                    const resolvedPlaceholder =
+                        typeof field.placeholder === 'function'
+                            ? field.placeholder(mode)
+                            : field.placeholder
+                    const resolvedClassName =
+                        typeof field.className === 'function'
+                            ? field.className(mode)
+                            : field.className
+
                     return (
                         <form.AppField key={field.name} name={field.name}>
                             {(fieldApi) => (

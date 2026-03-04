@@ -1,7 +1,8 @@
 import { formatFieldErrors } from '@/lib/errors'
+import type { StandardSchemaIssue } from '@/lib/errors'
 
 interface FieldErrorMessageProps {
-    meta: { isTouched?: boolean; isBlurred?: boolean; errors?: unknown[] }
+    meta: { isTouched?: boolean; isBlurred?: boolean; errors?: StandardSchemaIssue[] }
     showWhenSubmitted: boolean
 }
 

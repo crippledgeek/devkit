@@ -1,4 +1,4 @@
-import type { ZodType } from 'zod'
+import type { ZodType, ZodTypeDef } from 'zod'
 import { Binary, Base64, Hex, URLEncode, isValidEncoding } from '@/lib/encoding'
 import {
     binaryConverterSchema,
@@ -15,36 +15,56 @@ import {
 // Shared types
 // ---------------------------------------------------------------------------
 
+export type ConverterMode = 'encode' | 'decode'
+
 export interface SelectOption {
     value: string
     label: string
 }
 
 export interface ConverterFormBase {
-    mode: string
+    mode: ConverterMode
     input: string
 }
 
-export interface FieldConfig<T = Record<string, unknown>> {
+interface FieldConfigBase<T> {
     /** Field name — must match a key in the form's default values */
-    name: string
-    /** Render type */
-    type: 'select' | 'textarea'
+    name: string & keyof T
     /** Label text (static) */
     label: string
-    /** Options for select fields; 'encodings' resolves to the encoding list at render time */
-    options?: SelectOption[] | 'encodings'
-    /** Textarea row count */
-    rows?: number
-    /** Static or mode-dependent placeholder */
-    placeholder?: string | ((mode: string) => string)
     /** Show this field only when the predicate returns true */
     visibleWhen?: (values: T) => boolean
     /** Marks this field as the primary input (receives registerInputRef and dynamic label) */
     isInput?: boolean
-    /** Static or mode-dependent className */
-    className?: string | ((mode: string) => string | undefined)
 }
+
+export interface SelectFieldConfig<T = Record<string, unknown>> extends FieldConfigBase<T> {
+    /** Discriminant — render as a dropdown */
+    type: 'select'
+    /** Options for select fields; 'encodings' resolves to the encoding list at render time */
+    options?: SelectOption[] | 'encodings'
+    /** @internal Discriminated-union guard — prevents cross-variant property assignment */
+    rows?: never
+    /** @internal Discriminated-union guard — prevents cross-variant property assignment */
+    placeholder?: never
+    /** @internal Discriminated-union guard — prevents cross-variant property assignment */
+    className?: never
+}
+
+export interface TextAreaFieldConfig<T = Record<string, unknown>> extends FieldConfigBase<T> {
+    /** Discriminant — render as a multi-line text area */
+    type: 'textarea'
+    /** Textarea row count */
+    rows?: number
+    /** Static or mode-dependent placeholder */
+    placeholder?: string | ((mode: ConverterMode) => string)
+    /** Static or mode-dependent className */
+    className?: string | ((mode: ConverterMode) => string | undefined)
+    /** @internal Discriminated-union guard — prevents cross-variant property assignment */
+    options?: never
+}
+
+export type FieldConfig<T = Record<string, unknown>> = SelectFieldConfig<T> | TextAreaFieldConfig<T>
 
 export interface ConverterConfig<T extends ConverterFormBase> {
     /** Page heading */
@@ -52,7 +72,7 @@ export interface ConverterConfig<T extends ConverterFormBase> {
     /** Page sub-heading */
     description: string
     /** Zod schema for form-level validation */
-    schema: ZodType
+    schema: ZodType<T, ZodTypeDef, T>
     /** TanStack Form default values */
     defaultValues: T
     /** Ordered list of form fields */
@@ -60,9 +80,9 @@ export interface ConverterConfig<T extends ConverterFormBase> {
     /** Conversion logic — returns the result string */
     onSubmit: (values: T) => Promise<string>
     /** Dynamic label for the primary input field */
-    inputLabel: (mode: string) => string
+    inputLabel: (mode: ConverterMode) => string
     /** Dynamic label for the output area */
-    outputLabel: (mode: string) => string
+    outputLabel: (mode: ConverterMode) => string
 }
 
 // ---------------------------------------------------------------------------

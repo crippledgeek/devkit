@@ -150,7 +150,7 @@ const modeSchema = z.enum(['encode', 'decode'])
 function conditionalInputValidation(
     decodeSchema: z.ZodType<string>,
 ) {
-    return (data: { mode: string; input: string }, ctx: RefinementCtx) => {
+    return (data: { mode: 'encode' | 'decode'; input: string }, ctx: RefinementCtx) => {
         const schema = data.mode === 'encode' ? baseInputValidation : decodeSchema
         const result = schema.safeParse(data.input)
         if (!result.success) {
@@ -195,7 +195,7 @@ export const hexConverterSchema = z.object({
  * URL Encoder form schema
  */
 export const urlEncoderSchema = z.object({
-    mode: z.enum(['encode', 'decode']),
+    mode: modeSchema,
     encoding: encodingSchema,
     encodingMode: z.enum(['component', 'full']),
     input: z.string(),

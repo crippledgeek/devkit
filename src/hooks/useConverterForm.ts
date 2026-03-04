@@ -1,11 +1,12 @@
 import { useCallback, useMemo, useRef, useState } from 'react'
 import { POPULAR_ENCODINGS } from '@/lib/encoding'
 import { getErrorMessage } from '@/lib/errors'
+import type { StandardSchemaIssue } from '@/lib/errors'
 import { useAppForm } from '@/hooks/form'
 import type { ConverterConfig, ConverterFormBase, SelectOption } from '@/lib/converter-configs'
 
 interface FieldMetaLike {
-    errors?: unknown[]
+    errors?: StandardSchemaIssue[]
 }
 
 export function useConverterForm<T extends ConverterFormBase>(
