@@ -1,5 +1,4 @@
 export { FormSelect } from './FormSelect'
 export { FormTextArea } from './FormTextArea'
 export { FormButton } from './FormButton'
-export { FieldErrorMessage } from './FieldErrorMessage'
 export { ConverterPage } from './ConverterPage'
