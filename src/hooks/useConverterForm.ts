@@ -1,15 +1,14 @@
-import { useStore } from '@tanstack/react-form'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { POPULAR_ENCODINGS } from '@/lib/encoding'
 import { getErrorMessage } from '@/lib/errors'
 import { useAppForm } from '@/hooks/form'
-import type { ConverterConfig, SelectOption } from '@/lib/converter-configs'
+import type { ConverterConfig, ConverterFormBase, SelectOption } from '@/lib/converter-configs'
 
 interface FieldMetaLike {
     errors?: unknown[]
 }
 
-export function useConverterForm<T extends { mode: string }>(
+export function useConverterForm<T extends ConverterFormBase>(
     config: ConverterConfig<T>,
 ) {
     const [output, setOutput] = useState('')
@@ -33,18 +32,11 @@ export function useConverterForm<T extends { mode: string }>(
         },
     })
 
-    // Reactively read mode — triggers re-render only when mode changes
-    const mode = useStore(form.store, (state) => state.values.mode)
-
-    // Clear output and reset input when mode changes
-    const prevModeRef = useRef(mode)
-    useEffect(() => {
-        if (mode !== prevModeRef.current) {
-            prevModeRef.current = mode
-            setOutput('')
-            form.setFieldValue('input' as never, '' as never)
-        }
-    }, [mode, form])
+    // Clear output and reset input — used as a field listener for mode changes
+    const handleModeChange = useCallback(() => {
+        setOutput('')
+        form.setFieldValue('input' as never, '' as never)
+    }, [form])
 
     // -----------------------------------------------------------------------
     // Focus management (absorbed from useFormHelpers)
@@ -97,6 +89,7 @@ export function useConverterForm<T extends { mode: string }>(
         form,
         output,
         handleReset,
+        handleModeChange,
         encodingOptions,
         registerInputRef,
         focusFirstError,

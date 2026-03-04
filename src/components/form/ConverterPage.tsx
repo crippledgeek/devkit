@@ -1,19 +1,20 @@
 import { useStore } from '@tanstack/react-form'
 import { useConverterForm } from '@/hooks/useConverterForm'
-import type { ConverterConfig, SelectOption } from '@/lib/converter-configs'
+import type { ConverterConfig, ConverterFormBase, SelectOption } from '@/lib/converter-configs'
 import { FormTextArea } from './FormTextArea'
 
-interface ConverterPageProps<T> {
+interface ConverterPageProps<T extends ConverterFormBase> {
     config: ConverterConfig<T>
 }
 
-export function ConverterPage<T extends { mode: string }>({
+export function ConverterPage<T extends ConverterFormBase>({
     config,
 }: ConverterPageProps<T>) {
     const {
         form,
         output,
         handleReset,
+        handleModeChange,
         encodingOptions,
         registerInputRef,
         focusFirstError,
@@ -39,7 +40,7 @@ export function ConverterPage<T extends { mode: string }>({
                 {config.fields.map((field) => {
                     // Conditional visibility
                     const visible = !field.visibleWhen || field.visibleWhen(
-                        form.state.values as unknown as Record<string, unknown>,
+                        form.state.values,
                     )
                     if (!visible) return null
 
@@ -63,7 +64,13 @@ export function ConverterPage<T extends { mode: string }>({
                                 : (field.options ?? [])
 
                         return (
-                            <form.AppField key={field.name} name={field.name}>
+                            <form.AppField
+                                key={field.name}
+                                name={field.name}
+                                listeners={field.name === 'mode' ? {
+                                    onChange: handleModeChange,
+                                } : undefined}
+                            >
                                 {(fieldApi) => (
                                     <fieldApi.SelectField
                                         label={resolvedLabel}

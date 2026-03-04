@@ -20,7 +20,12 @@ export interface SelectOption {
     label: string
 }
 
-export interface FieldConfig {
+export interface ConverterFormBase {
+    mode: string
+    input: string
+}
+
+export interface FieldConfig<T = Record<string, unknown>> {
     /** Field name — must match a key in the form's default values */
     name: string
     /** Render type */
@@ -34,14 +39,14 @@ export interface FieldConfig {
     /** Static or mode-dependent placeholder */
     placeholder?: string | ((mode: string) => string)
     /** Show this field only when the predicate returns true */
-    visibleWhen?: (values: Record<string, unknown>) => boolean
+    visibleWhen?: (values: T) => boolean
     /** Marks this field as the primary input (receives registerInputRef and dynamic label) */
     isInput?: boolean
     /** Static or mode-dependent className */
     className?: string | ((mode: string) => string | undefined)
 }
 
-export interface ConverterConfig<T> {
+export interface ConverterConfig<T extends ConverterFormBase> {
     /** Page heading */
     title: string
     /** Page sub-heading */
@@ -51,7 +56,7 @@ export interface ConverterConfig<T> {
     /** TanStack Form default values */
     defaultValues: T
     /** Ordered list of form fields */
-    fields: FieldConfig[]
+    fields: FieldConfig<T>[]
     /** Conversion logic — returns the result string */
     onSubmit: (values: T) => Promise<string>
     /** Dynamic label for the primary input field */
