@@ -9,8 +9,9 @@ interface LoaderProps {
 
 export function Loader({ size = 24, className, text }: LoaderProps) {
     return (
-        <div className="flex items-center justify-center gap-2">
+        <div role="status" aria-label={text ?? 'Loading'} className="flex items-center justify-center gap-2">
             <Loader2
+                aria-hidden="true"
                 size={size}
                 className={cn("animate-spin", className)}
             />
@@ -33,7 +34,7 @@ export function LoaderFullPage({ text = 'Loading...' }: { text?: string }) {
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-50">
             <div className="flex flex-col items-center gap-4">
-                <Loader2 size={48} className="animate-spin text-primary" />
+                <Loader2 aria-hidden="true" size={48} className="animate-spin text-primary" />
                 <p className="text-lg font-medium">{text}</p>
             </div>
         </div>
@@ -41,7 +42,11 @@ export function LoaderFullPage({ text = 'Loading...' }: { text?: string }) {
 }
 
 export function LoaderInline({ size = 16 }: { size?: number }) {
-    return <Loader2 size={size} className="animate-spin" />
+    return (
+        <span role="status" aria-label="Loading">
+            <Loader2 aria-hidden="true" size={size} className="animate-spin" />
+        </span>
+    )
 }
 
 export function LoaderOverlay({ text }: { text?: string }) {
