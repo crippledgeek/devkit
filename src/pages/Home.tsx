@@ -38,10 +38,11 @@ const Home = () => {
         <div className="flex flex-col md:flex-row gap-4">
           {/* Search Input */}
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <Search aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <input
               type="text"
               placeholder="Search tools..."
+              aria-label="Search tools"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-10 pr-4 py-3 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
@@ -49,9 +50,10 @@ const Home = () => {
           </div>
 
           {/* Category Filter */}
-          <div className="flex gap-2 flex-wrap md:flex-nowrap">
+          <div role="group" aria-label="Filter by category" className="flex gap-2 flex-wrap md:flex-nowrap">
             <button
               onClick={() => setSelectedCategory('All')}
+              aria-pressed={selectedCategory === 'All'}
               className={`px-4 py-2 rounded-lg font-medium transition-all ${
                 selectedCategory === 'All'
                   ? 'bg-primary text-primary-foreground'
@@ -64,6 +66,7 @@ const Home = () => {
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
+                aria-pressed={selectedCategory === category}
                 className={`px-4 py-2 rounded-lg font-medium transition-all whitespace-nowrap ${
                   selectedCategory === category
                     ? 'bg-primary text-primary-foreground'
@@ -139,7 +142,7 @@ const ToolCard = ({ tool }: ToolCardProps) => {
     >
       {/* Icon */}
       <div className="mb-4 inline-flex rounded-lg bg-primary/10 p-3 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-        <Icon className="h-6 w-6" />
+        <Icon aria-hidden="true" className="h-6 w-6" />
       </div>
 
       {/* Content */}
@@ -155,7 +158,7 @@ const ToolCard = ({ tool }: ToolCardProps) => {
         <span className="text-xs font-medium text-muted-foreground bg-muted px-2 py-1 rounded">
           {tool.category}
         </span>
-        <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+        <ArrowRight aria-hidden="true" className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
       </div>
 
       {/* Hover Effect Gradient */}
@@ -173,7 +176,7 @@ interface FeatureCardProps {
 const FeatureCard = ({ title, description, icon }: FeatureCardProps) => {
   return (
     <div className="text-center p-6 rounded-xl border border-border bg-card/50 backdrop-blur">
-      <div className="text-4xl mb-4">{icon}</div>
+      <div className="text-4xl mb-4" role="img" aria-label={title}>{icon}</div>
       <h3 className="text-xl font-semibold mb-2">{title}</h3>
       <p className="text-muted-foreground text-sm">{description}</p>
     </div>

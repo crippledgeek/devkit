@@ -102,15 +102,17 @@ export function ConverterPage<T extends ConverterFormBase>({
                     <form.ConvertActions onReset={handleReset} />
                 </form.AppForm>
 
-                {output && (
-                    <FormTextArea
-                        name="output"
-                        label={config.outputLabel(mode)}
-                        value={output}
-                        readOnly
-                        className="font-mono"
-                    />
-                )}
+                <div aria-live="polite" aria-atomic="true">
+                    {output && (
+                        <FormTextArea
+                            name="output"
+                            label={config.outputLabel(mode)}
+                            value={output}
+                            readOnly
+                            className="font-mono"
+                        />
+                    )}
+                </div>
             </form>
         </div>
     )
