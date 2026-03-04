@@ -15,13 +15,15 @@ import {
 // Shared types
 // ---------------------------------------------------------------------------
 
+export type ConverterMode = 'encode' | 'decode'
+
 export interface SelectOption {
     value: string
     label: string
 }
 
 export interface ConverterFormBase {
-    mode: string
+    mode: ConverterMode
     input: string
 }
 
@@ -37,13 +39,13 @@ export interface FieldConfig<T = Record<string, unknown>> {
     /** Textarea row count */
     rows?: number
     /** Static or mode-dependent placeholder */
-    placeholder?: string | ((mode: string) => string)
+    placeholder?: string | ((mode: ConverterMode) => string)
     /** Show this field only when the predicate returns true */
     visibleWhen?: (values: T) => boolean
     /** Marks this field as the primary input (receives registerInputRef and dynamic label) */
     isInput?: boolean
     /** Static or mode-dependent className */
-    className?: string | ((mode: string) => string | undefined)
+    className?: string | ((mode: ConverterMode) => string | undefined)
 }
 
 export interface ConverterConfig<T extends ConverterFormBase> {
@@ -60,9 +62,9 @@ export interface ConverterConfig<T extends ConverterFormBase> {
     /** Conversion logic — returns the result string */
     onSubmit: (values: T) => Promise<string>
     /** Dynamic label for the primary input field */
-    inputLabel: (mode: string) => string
+    inputLabel: (mode: ConverterMode) => string
     /** Dynamic label for the output area */
-    outputLabel: (mode: string) => string
+    outputLabel: (mode: ConverterMode) => string
 }
 
 // ---------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 import { useStore } from '@tanstack/react-form'
 import { useConverterForm } from '@/hooks/useConverterForm'
-import type { ConverterConfig, ConverterFormBase, SelectOption } from '@/lib/converter-configs'
+import type { ConverterConfig, ConverterFormBase, ConverterMode, SelectOption } from '@/lib/converter-configs'
 import { FormTextArea } from './FormTextArea'
 
 interface ConverterPageProps<T extends ConverterFormBase> {
@@ -21,7 +21,7 @@ export function ConverterPage<T extends ConverterFormBase>({
     } = useConverterForm(config)
 
     // Selective subscription: only re-render when mode changes
-    const mode: string = useStore(form.store, (state) => state.values.mode)
+    const mode: ConverterMode = useStore(form.store, (state) => state.values.mode)
 
     return (
         <div className="max-w-4xl mx-auto">
