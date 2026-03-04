@@ -14,8 +14,8 @@ export interface StandardSchemaIssue {
 /**
  * Extract error messages from form field errors
  */
-export function formatFieldErrors(errors: unknown[]): string {
-    return errors.map((err) => (err as StandardSchemaIssue).message).join(', ')
+export function formatFieldErrors(errors: StandardSchemaIssue[]): string {
+    return errors.map((err) => err.message).join(', ')
 }
 
 export class EncodingError extends Error {
