@@ -1,23 +1,8 @@
 import { URLEncode, isValidEncoding } from '@/lib/encoding'
-import { FormButton, FormSelect, FormTextArea } from '@/components/form'
+import { FieldErrorMessage, FormButton, FormSelect, FormTextArea } from '@/components/form'
 import { useConverterForm } from '@/hooks/useConverterForm'
 import { useFormHelpers } from '@/hooks/useFormHelpers'
 import { urlEncoderSchema, type URLEncoderForm } from '@/lib/validation-schemas'
-import { formatFieldErrors } from '@/lib/errors'
-
-function FieldError({
-    meta,
-    showWhenSubmitted,
-}: {
-    meta: { isTouched?: boolean; isBlurred?: boolean; errors?: unknown[] }
-    showWhenSubmitted: boolean
-}) {
-    const shouldShow = meta.isTouched || meta.isBlurred || showWhenSubmitted
-    const errs = meta.errors ?? []
-    return shouldShow && errs.length > 0 ? (
-        <em className="text-red-500 text-sm">{formatFieldErrors(errs)}</em>
-    ) : null
-}
 
 export default function URLEncoder() {
     const { form, output, setOutput, handleReset, encodingOptions } = useConverterForm<URLEncoderForm>({
@@ -78,7 +63,7 @@ export default function URLEncoder() {
                                         { value: 'decode', label: 'Decode (URL → Text)' },
                                     ]}
                                 />
-                                <FieldError
+                                <FieldErrorMessage
                                     meta={field.state.meta}
                                     showWhenSubmitted={form.state.isSubmitted}
                                 />
@@ -97,7 +82,7 @@ export default function URLEncoder() {
                                 onChange={field.handleChange}
                                 options={encodingOptions}
                             />
-                            <FieldError
+                            <FieldErrorMessage
                                 meta={field.state.meta}
                                 showWhenSubmitted={form.state.isSubmitted}
                             />
@@ -122,7 +107,7 @@ export default function URLEncoder() {
                                         { value: 'full', label: 'Full URL (preserves :/?#[]@!$&\'()*+,;=)' },
                                     ]}
                                 />
-                                <FieldError
+                                <FieldErrorMessage
                                     meta={field.state.meta}
                                     showWhenSubmitted={form.state.isSubmitted}
                                 />
@@ -147,7 +132,7 @@ export default function URLEncoder() {
                                 }
                                 rows={6}
                             />
-                            <FieldError
+                            <FieldErrorMessage
                                 meta={field.state.meta}
                                 showWhenSubmitted={form.state.isSubmitted}
                             />

@@ -1,23 +1,8 @@
 import { Base64, isValidEncoding } from '@/lib/encoding'
-import { FormButton, FormSelect, FormTextArea } from '@/components/form'
+import { FieldErrorMessage, FormButton, FormSelect, FormTextArea } from '@/components/form'
 import { useConverterForm } from '@/hooks/useConverterForm'
 import { useFormHelpers } from '@/hooks/useFormHelpers'
 import { base64ConverterSchema, type Base64ConverterForm } from '@/lib/validation-schemas'
-import { formatFieldErrors } from '@/lib/errors'
-
-function FieldError({
-    meta,
-    showWhenSubmitted,
-}: {
-    meta: { isTouched?: boolean; isBlurred?: boolean; errors?: unknown[] }
-    showWhenSubmitted: boolean
-}) {
-    const shouldShow = meta.isTouched || meta.isBlurred || showWhenSubmitted
-    const errs = meta.errors ?? []
-    return shouldShow && errs.length > 0 ? (
-        <em className="text-red-500 text-sm">{formatFieldErrors(errs)}</em>
-    ) : null
-}
 
 export default function TextBase64Converter() {
     const { encode, decode } = Base64
@@ -84,7 +69,7 @@ export default function TextBase64Converter() {
                                         { value: 'decode', label: 'Decode (Base64 → Text)' },
                                     ]}
                                 />
-                                <FieldError
+                                <FieldErrorMessage
                                     meta={field.state.meta}
                                     showWhenSubmitted={form.state.isSubmitted}
                                 />
@@ -105,7 +90,7 @@ export default function TextBase64Converter() {
                                 onChange={(value) => field.setValue(value)}
                                 options={encodingOptions}
                             />
-                            <FieldError
+                            <FieldErrorMessage
                                 meta={field.state.meta}
                                 showWhenSubmitted={form.state.isSubmitted}
                             />
@@ -128,7 +113,7 @@ export default function TextBase64Converter() {
                                 onChange={(e) => field.handleChange(e)}
                                 className={form.state.values.mode === 'decode' ? 'font-mono' : undefined}
                             />
-                            <FieldError
+                            <FieldErrorMessage
                                 meta={field.state.meta}
                                 showWhenSubmitted={form.state.isSubmitted}
                             />

@@ -1,4 +1,5 @@
 import { Loader2 } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 interface LoaderProps {
     size?: number
@@ -6,12 +7,12 @@ interface LoaderProps {
     text?: string
 }
 
-export function Loader({ size = 24, className = '', text }: LoaderProps) {
+export function Loader({ size = 24, className, text }: LoaderProps) {
     return (
         <div className="flex items-center justify-center gap-2">
             <Loader2
                 size={size}
-                className={`animate-spin ${className}`}
+                className={cn("animate-spin", className)}
             />
             {text && <span className="text-sm text-muted-foreground">{text}</span>}
         </div>
