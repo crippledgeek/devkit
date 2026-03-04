@@ -62,7 +62,7 @@ export interface ConverterConfig<T extends ConverterFormBase> {
     /** Page sub-heading */
     description: string
     /** Zod schema for form-level validation */
-    schema: ZodType
+    schema: ZodType<T>
     /** TanStack Form default values */
     defaultValues: T
     /** Ordered list of form fields */
