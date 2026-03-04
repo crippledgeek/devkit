@@ -1,6 +1,6 @@
 import { FormTextArea } from './FormTextArea'
 import { FieldErrorMessage } from './FieldErrorMessage'
-import { useFieldContext, useFormContext } from '@/hooks/form'
+import { useFieldContext } from '@/hooks/form'
 
 interface TextAreaFieldProps {
     label: string
@@ -18,7 +18,6 @@ export function TextAreaField({
     registerRef,
 }: TextAreaFieldProps) {
     const field = useFieldContext<string>()
-    const form = useFormContext()
 
     return (
         <>
@@ -35,7 +34,7 @@ export function TextAreaField({
             />
             <FieldErrorMessage
                 meta={field.state.meta}
-                showWhenSubmitted={form.state.isSubmitted}
+                showWhenSubmitted={field.form.state.isSubmitted}
             />
         </>
     )

@@ -1,6 +1,6 @@
 import { FormSelect } from './FormSelect'
 import { FieldErrorMessage } from './FieldErrorMessage'
-import { useFieldContext, useFormContext } from '@/hooks/form'
+import { useFieldContext } from '@/hooks/form'
 import type { SelectOption } from '@/lib/converter-configs'
 
 interface SelectFieldProps {
@@ -10,7 +10,6 @@ interface SelectFieldProps {
 
 export function SelectField({ label, options }: SelectFieldProps) {
     const field = useFieldContext<string>()
-    const form = useFormContext()
 
     return (
         <>
@@ -23,7 +22,7 @@ export function SelectField({ label, options }: SelectFieldProps) {
             />
             <FieldErrorMessage
                 meta={field.state.meta}
-                showWhenSubmitted={form.state.isSubmitted}
+                showWhenSubmitted={field.form.state.isSubmitted}
             />
         </>
     )
