@@ -73,7 +73,7 @@ export function ConverterPage<T extends ConverterFormBase>({
                         )
                     }
 
-                    // TypeScript narrows to TextAreaFieldConfig here
+                    // Resolve textarea-specific dynamic properties (narrowed to TextAreaFieldConfig)
                     const resolvedPlaceholder =
                         typeof field.placeholder === 'function'
                             ? field.placeholder(mode)

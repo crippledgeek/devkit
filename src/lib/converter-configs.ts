@@ -39,15 +39,20 @@ interface FieldConfigBase<T> {
 }
 
 export interface SelectFieldConfig<T = Record<string, unknown>> extends FieldConfigBase<T> {
+    /** Discriminant — render as a dropdown */
     type: 'select'
     /** Options for select fields; 'encodings' resolves to the encoding list at render time */
     options?: SelectOption[] | 'encodings'
+    /** @internal Discriminated-union guard — prevents cross-variant property assignment */
     rows?: never
+    /** @internal Discriminated-union guard — prevents cross-variant property assignment */
     placeholder?: never
+    /** @internal Discriminated-union guard — prevents cross-variant property assignment */
     className?: never
 }
 
 export interface TextAreaFieldConfig<T = Record<string, unknown>> extends FieldConfigBase<T> {
+    /** Discriminant — render as a multi-line text area */
     type: 'textarea'
     /** Textarea row count */
     rows?: number
@@ -55,6 +60,7 @@ export interface TextAreaFieldConfig<T = Record<string, unknown>> extends FieldC
     placeholder?: string | ((mode: ConverterMode) => string)
     /** Static or mode-dependent className */
     className?: string | ((mode: ConverterMode) => string | undefined)
+    /** @internal Discriminated-union guard — prevents cross-variant property assignment */
     options?: never
 }
 
