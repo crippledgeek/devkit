@@ -1,4 +1,4 @@
-import type { ZodType } from 'zod'
+import type { ZodType, ZodTypeDef } from 'zod'
 import { Binary, Base64, Hex, URLEncode, isValidEncoding } from '@/lib/encoding'
 import {
     binaryConverterSchema,
@@ -66,7 +66,7 @@ export interface ConverterConfig<T extends ConverterFormBase> {
     /** Page sub-heading */
     description: string
     /** Zod schema for form-level validation */
-    schema: ZodType<T>
+    schema: ZodType<T, ZodTypeDef, T>
     /** TanStack Form default values */
     defaultValues: T
     /** Ordered list of form fields */

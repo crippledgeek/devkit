@@ -7,7 +7,7 @@
  */
 export interface StandardSchemaIssue {
     message: string
-    path?: (string | number)[]
+    path?: ReadonlyArray<PropertyKey | { readonly key: PropertyKey }>
     [key: string]: unknown
 }
 
@@ -77,9 +77,8 @@ export function getErrorMessage(error: unknown): string {
             case ERROR_CODES.ENCODE_FAILED:
                 return `Failed to encode data. ${error.message}`
             case ERROR_CODES.EMPTY_INPUT:
-                return `Input cannot be empty. ${error.message}`
             case ERROR_CODES.INPUT_TOO_LARGE:
-                return `Input is too large. ${error.message}`
+                return error.message
             default: {
                 const _exhaustive: never = error.code
                 void _exhaustive
