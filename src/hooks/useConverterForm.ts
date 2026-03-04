@@ -1,35 +1,31 @@
 import { useForm } from '@tanstack/react-form'
-import { useEffect, useState, useRef, useMemo } from 'react'
+import { useStore } from '@tanstack/react-store'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { POPULAR_ENCODINGS } from '@/lib/encoding'
 import { getErrorMessage } from '@/lib/errors'
+import type { ConverterConfig, SelectOption } from '@/lib/converter-configs'
 
-interface UseConverterFormOptions<T> {
-    defaultValues: T
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    validationSchema?: any
-    onSubmit: (values: T) => Promise<void>
+interface FieldMetaLike {
+    errors?: unknown[]
 }
 
-export function useConverterForm<T extends { mode: string }>({
-                                                                 defaultValues,
-                                                                 validationSchema,
-                                                                 onSubmit,
-                                                             }: UseConverterFormOptions<T>) {
+export function useConverterForm<T extends { mode: string }>(
+    config: ConverterConfig<T>,
+) {
     const [output, setOutput] = useState('')
 
     const form = useForm({
-        defaultValues,
-        validators: validationSchema,
+        defaultValues: config.defaultValues,
+        validators: { onChange: config.schema },
         onSubmit: async ({ value }) => {
             try {
-                setOutput('') // Clear previous output
-
-                await onSubmit(value)
+                setOutput('')
+                const result = await config.onSubmit(value)
+                setOutput(result)
             } catch (error) {
                 const errorMessage = getErrorMessage(error)
                 setOutput(`Error: ${errorMessage}`)
 
-                // Only log detailed errors in development
                 if (import.meta.env.DEV) {
                     console.error('Conversion error:', error)
                 }
@@ -37,40 +33,72 @@ export function useConverterForm<T extends { mode: string }>({
         },
     })
 
-    // Clear output when mode changes (fixed memory leak)
-    const prevModeRef = useRef(form.state.values.mode)
+    // Reactively read mode — triggers re-render only when mode changes
+    const mode = useStore(form.store, (state) => state.values.mode)
 
+    // Clear output and reset input when mode changes
+    const prevModeRef = useRef(mode)
     useEffect(() => {
-        const unsubscribe = form.store.subscribe(() => {
-            const nextMode = form.state.values.mode
-            if (nextMode !== prevModeRef.current) {
-                prevModeRef.current = nextMode
-                setOutput('')
-            }
-        })
-        return unsubscribe
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [form.store])
+        if (mode !== prevModeRef.current) {
+            prevModeRef.current = mode
+            setOutput('')
+            form.setFieldValue('input' as never, '' as never)
+        }
+    }, [mode, form])
 
-    const handleReset = () => {
+    // -----------------------------------------------------------------------
+    // Focus management (absorbed from useFormHelpers)
+    // -----------------------------------------------------------------------
+
+    const inputRefs = useRef<Record<string, HTMLInputElement | HTMLTextAreaElement | null>>({})
+
+    const registerInputRef = useCallback(
+        (name: string) =>
+            (el: HTMLInputElement | HTMLTextAreaElement | null): void => {
+                inputRefs.current[name] = el
+            },
+        [],
+    )
+
+    const focusFirstError = useCallback((): void => {
+        const fieldMeta = form.state.fieldMeta as Record<string, FieldMetaLike>
+        const firstBad = Object.entries(fieldMeta).find(
+            ([, meta]) => (meta.errors?.length ?? 0) > 0,
+        )
+        if (firstBad) {
+            const [name] = firstBad
+            inputRefs.current[name]?.focus()
+        }
+    }, [form.state.fieldMeta])
+
+    // -----------------------------------------------------------------------
+    // Callbacks
+    // -----------------------------------------------------------------------
+
+    const handleReset = useCallback(() => {
         form.reset()
         setOutput('')
-    }
+    }, [form])
 
-    // Memoize encoding options to avoid recreating on every render
-    const encodingOptions = useMemo(
-        () => POPULAR_ENCODINGS.map(enc => ({
-            value: enc,
-            label: enc.toUpperCase()
-        })),
-        []
+    // -----------------------------------------------------------------------
+    // Encoding options
+    // -----------------------------------------------------------------------
+
+    const encodingOptions: SelectOption[] = useMemo(
+        () =>
+            POPULAR_ENCODINGS.map((enc) => ({
+                value: enc,
+                label: enc.toUpperCase(),
+            })),
+        [],
     )
 
     return {
         form,
         output,
-        setOutput,
         handleReset,
         encodingOptions,
+        registerInputRef,
+        focusFirstError,
     }
 }
