@@ -19,9 +19,9 @@ export function formatFieldErrors(errors: unknown[]): string {
 }
 
 export class EncodingError extends Error {
-    public readonly code: string
+    public readonly code: ErrorCode
 
-    constructor(message: string, code: string) {
+    constructor(message: string, code: ErrorCode) {
         super(message)
         this.name = 'EncodingError'
         this.code = code
@@ -52,6 +52,8 @@ export const ERROR_CODES = {
     DECODE_FAILED: 'DECODE_FAILED',
 } as const
 
+export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES]
+
 /**
  * Get user-friendly error message from error object
  */
@@ -72,8 +74,17 @@ export function getErrorMessage(error: unknown): string {
                 return `Invalid hexadecimal format. Expected hex digits (0-9, a-f). ${error.message}`
             case ERROR_CODES.DECODE_FAILED:
                 return `Failed to decode data. ${error.message}`
-            default:
+            case ERROR_CODES.ENCODE_FAILED:
+                return `Failed to encode data. ${error.message}`
+            case ERROR_CODES.EMPTY_INPUT:
+                return `Input cannot be empty. ${error.message}`
+            case ERROR_CODES.INPUT_TOO_LARGE:
+                return `Input is too large. ${error.message}`
+            default: {
+                const _exhaustive: never = error.code
+                void _exhaustive
                 return error.message
+            }
         }
     }
 
