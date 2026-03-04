@@ -1,10 +1,11 @@
-import type { AnyFormApi } from '@tanstack/react-form'
 import { FormSelect } from './FormSelect'
 import { FieldErrorMessage } from './FieldErrorMessage'
 import type { SelectOption } from '@/lib/converter-configs'
 
 interface SelectFieldProps {
-    form: AnyFormApi
+    /** TanStack React Form instance (ReactFormExtendedApi) */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    form: any
     name: string
     label: string
     options: SelectOption[]
@@ -19,7 +20,7 @@ export function SelectField({ form, name, label, options }: SelectFieldProps) {
                         name={name}
                         label={label}
                         value={field.state.value}
-                        onChange={(value) => field.setValue(value)}
+                        onChange={(value: string) => field.setValue(value)}
                         options={options}
                     />
                     <FieldErrorMessage

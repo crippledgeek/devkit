@@ -1,9 +1,10 @@
-import type { AnyFormApi } from '@tanstack/react-form'
 import { FormTextArea } from './FormTextArea'
 import { FieldErrorMessage } from './FieldErrorMessage'
 
 interface TextAreaFieldProps {
-    form: AnyFormApi
+    /** TanStack React Form instance (ReactFormExtendedApi) */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    form: any
     name: string
     label: string
     placeholder?: string

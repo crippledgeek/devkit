@@ -1,5 +1,4 @@
-import { useForm } from '@tanstack/react-form'
-import { useStore } from '@tanstack/react-store'
+import { useForm, useStore } from '@tanstack/react-form'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { POPULAR_ENCODINGS } from '@/lib/encoding'
 import { getErrorMessage } from '@/lib/errors'

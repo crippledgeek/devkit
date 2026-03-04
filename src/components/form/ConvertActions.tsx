@@ -1,8 +1,9 @@
-import type { AnyFormApi } from '@tanstack/react-form'
 import { FormButton } from './FormButton'
 
 interface ConvertActionsProps {
-    form: AnyFormApi
+    /** TanStack React Form instance (ReactFormExtendedApi) */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    form: any
     onReset: () => void
 }
 
