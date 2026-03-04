@@ -27,26 +27,34 @@ export interface ConverterFormBase {
     input: string
 }
 
-export interface FieldConfig<T = Record<string, unknown>> {
+interface FieldConfigBase<T> {
     /** Field name — must match a key in the form's default values */
-    name: string
-    /** Render type */
-    type: 'select' | 'textarea'
+    name: string & keyof T
     /** Label text (static) */
     label: string
-    /** Options for select fields; 'encodings' resolves to the encoding list at render time */
-    options?: SelectOption[] | 'encodings'
-    /** Textarea row count */
-    rows?: number
-    /** Static or mode-dependent placeholder */
-    placeholder?: string | ((mode: ConverterMode) => string)
     /** Show this field only when the predicate returns true */
     visibleWhen?: (values: T) => boolean
     /** Marks this field as the primary input (receives registerInputRef and dynamic label) */
     isInput?: boolean
+}
+
+export interface SelectFieldConfig<T = Record<string, unknown>> extends FieldConfigBase<T> {
+    type: 'select'
+    /** Options for select fields; 'encodings' resolves to the encoding list at render time */
+    options?: SelectOption[] | 'encodings'
+}
+
+export interface TextAreaFieldConfig<T = Record<string, unknown>> extends FieldConfigBase<T> {
+    type: 'textarea'
+    /** Textarea row count */
+    rows?: number
+    /** Static or mode-dependent placeholder */
+    placeholder?: string | ((mode: ConverterMode) => string)
     /** Static or mode-dependent className */
     className?: string | ((mode: ConverterMode) => string | undefined)
 }
+
+export type FieldConfig<T = Record<string, unknown>> = SelectFieldConfig<T> | TextAreaFieldConfig<T>
 
 export interface ConverterConfig<T extends ConverterFormBase> {
     /** Page heading */
