@@ -1,13 +1,13 @@
 import { FormButton } from './FormButton'
+import { useFormContext } from '@/hooks/form'
 
 interface ConvertActionsProps {
-    /** TanStack React Form instance (ReactFormExtendedApi) */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    form: any
     onReset: () => void
 }
 
-export function ConvertActions({ form, onReset }: ConvertActionsProps) {
+export function ConvertActions({ onReset }: ConvertActionsProps) {
+    const form = useFormContext()
+
     return (
         <div className="flex gap-2">
             <FormButton type="button" variant="secondary" onPress={onReset}>
@@ -19,7 +19,7 @@ export function ConvertActions({ form, onReset }: ConvertActionsProps) {
                     state.isSubmitting,
                 ]}
             >
-                {([canSubmit, isSubmitting]: [boolean, boolean]) => (
+                {([canSubmit, isSubmitting]) => (
                     <FormButton
                         type="submit"
                         isDisabled={!canSubmit || isSubmitting}

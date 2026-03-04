@@ -1,7 +1,8 @@
-import { useForm, useStore } from '@tanstack/react-form'
+import { useStore } from '@tanstack/react-form'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { POPULAR_ENCODINGS } from '@/lib/encoding'
 import { getErrorMessage } from '@/lib/errors'
+import { useAppForm } from '@/hooks/form'
 import type { ConverterConfig, SelectOption } from '@/lib/converter-configs'
 
 interface FieldMetaLike {
@@ -13,7 +14,7 @@ export function useConverterForm<T extends { mode: string }>(
 ) {
     const [output, setOutput] = useState('')
 
-    const form = useForm({
+    const form = useAppForm({
         defaultValues: config.defaultValues,
         validators: { onChange: config.schema },
         onSubmit: async ({ value }) => {

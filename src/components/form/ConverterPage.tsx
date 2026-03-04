@@ -1,9 +1,6 @@
 import { useStore } from '@tanstack/react-form'
 import { useConverterForm } from '@/hooks/useConverterForm'
-import type { ConverterConfig, FieldConfig, SelectOption } from '@/lib/converter-configs'
-import { SelectField } from './SelectField'
-import { TextAreaField } from './TextAreaField'
-import { ConvertActions } from './ConvertActions'
+import type { ConverterConfig, SelectOption } from '@/lib/converter-configs'
 import { FormTextArea } from './FormTextArea'
 
 interface ConverterPageProps<T> {
@@ -39,19 +36,63 @@ export function ConverterPage<T extends { mode: string }>({
                 }}
                 className="flex flex-col gap-6"
             >
-                {config.fields.map((field) => (
-                    <FieldRenderer
-                        key={field.name}
-                        field={field}
-                        form={form}
-                        mode={mode}
-                        encodingOptions={encodingOptions}
-                        registerInputRef={registerInputRef}
-                        inputLabel={config.inputLabel(mode)}
-                    />
-                ))}
+                {config.fields.map((field) => {
+                    // Conditional visibility
+                    const visible = !field.visibleWhen || field.visibleWhen(
+                        form.state.values as unknown as Record<string, unknown>,
+                    )
+                    if (!visible) return null
 
-                <ConvertActions form={form} onReset={handleReset} />
+                    // Resolve dynamic properties
+                    const resolvedLabel = field.isInput
+                        ? config.inputLabel(mode)
+                        : field.label
+                    const resolvedPlaceholder =
+                        typeof field.placeholder === 'function'
+                            ? field.placeholder(mode)
+                            : field.placeholder
+                    const resolvedClassName =
+                        typeof field.className === 'function'
+                            ? field.className(mode)
+                            : field.className
+
+                    if (field.type === 'select') {
+                        const resolvedOptions: SelectOption[] =
+                            field.options === 'encodings'
+                                ? encodingOptions
+                                : (field.options ?? [])
+
+                        return (
+                            <form.AppField key={field.name} name={field.name}>
+                                {(fieldApi) => (
+                                    <fieldApi.SelectField
+                                        label={resolvedLabel}
+                                        options={resolvedOptions}
+                                    />
+                                )}
+                            </form.AppField>
+                        )
+                    }
+
+                    // textarea
+                    return (
+                        <form.AppField key={field.name} name={field.name}>
+                            {(fieldApi) => (
+                                <fieldApi.TextAreaField
+                                    label={resolvedLabel}
+                                    placeholder={resolvedPlaceholder}
+                                    rows={field.rows}
+                                    className={resolvedClassName}
+                                    registerRef={field.isInput ? registerInputRef : undefined}
+                                />
+                            )}
+                        </form.AppField>
+                    )
+                })}
+
+                <form.AppForm>
+                    <form.ConvertActions onReset={handleReset} />
+                </form.AppForm>
 
                 {output && (
                     <FormTextArea
@@ -64,69 +105,5 @@ export function ConverterPage<T extends { mode: string }>({
                 )}
             </form>
         </div>
-    )
-}
-
-// ---------------------------------------------------------------------------
-// Internal field renderer
-// ---------------------------------------------------------------------------
-
-interface FieldRendererProps {
-    field: FieldConfig
-    /** TanStack React Form instance (ReactFormExtendedApi) */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    form: any
-    mode: string
-    encodingOptions: SelectOption[]
-    registerInputRef: (name: string) => (el: HTMLInputElement | HTMLTextAreaElement | null) => void
-    inputLabel: string
-}
-
-function FieldRenderer({
-    field,
-    form,
-    mode,
-    encodingOptions,
-    registerInputRef,
-    inputLabel,
-}: FieldRendererProps) {
-    // Conditional visibility
-    if (field.visibleWhen) {
-        const values = form.state.values as Record<string, unknown>
-        if (!field.visibleWhen(values)) return null
-    }
-
-    // Resolve dynamic properties
-    const resolvedLabel = field.isInput ? inputLabel : field.label
-    const resolvedPlaceholder =
-        typeof field.placeholder === 'function' ? field.placeholder(mode) : field.placeholder
-    const resolvedClassName =
-        typeof field.className === 'function' ? field.className(mode) : field.className
-
-    if (field.type === 'select') {
-        const resolvedOptions: SelectOption[] =
-            field.options === 'encodings' ? encodingOptions : (field.options ?? [])
-
-        return (
-            <SelectField
-                form={form}
-                name={field.name}
-                label={resolvedLabel}
-                options={resolvedOptions}
-            />
-        )
-    }
-
-    // textarea
-    return (
-        <TextAreaField
-            form={form}
-            name={field.name}
-            label={resolvedLabel}
-            placeholder={resolvedPlaceholder}
-            rows={field.rows}
-            className={resolvedClassName}
-            registerRef={field.isInput ? registerInputRef : undefined}
-        />
     )
 }
