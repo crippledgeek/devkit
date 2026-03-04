@@ -32,7 +32,9 @@ export function useConverterForm<T extends ConverterFormBase>(
         },
     })
 
-    // Clear output and reset input — used as a field listener for mode changes
+    // Clear output and reset input — used as a field listener for mode changes.
+    // ConverterFormBase guarantees 'input' exists, but the generic indirection
+    // prevents TypeScript from resolving the key — hence `as never`.
     const handleModeChange = useCallback(() => {
         setOutput('')
         form.setFieldValue('input' as never, '' as never)
