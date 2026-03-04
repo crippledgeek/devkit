@@ -32,7 +32,7 @@ export function LoaderPending(){
 // Other variants...
 export function LoaderFullPage({ text = 'Loading...' }: { text?: string }) {
     return (
-        <div className="fixed inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-50">
+        <div role="status" aria-label={text} className="fixed inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-50">
             <div className="flex flex-col items-center gap-4">
                 <Loader2 aria-hidden="true" size={48} className="animate-spin text-primary" />
                 <p className="text-lg font-medium">{text}</p>
