@@ -32,14 +32,10 @@ interface FieldConfigBase<T> {
     name: string & keyof T
     /** Label text (static) */
     label: string
-    /** Static or mode-dependent placeholder */
-    placeholder?: string | ((mode: ConverterMode) => string)
     /** Show this field only when the predicate returns true */
     visibleWhen?: (values: T) => boolean
     /** Marks this field as the primary input (receives registerInputRef and dynamic label) */
     isInput?: boolean
-    /** Static or mode-dependent className */
-    className?: string | ((mode: ConverterMode) => string | undefined)
 }
 
 export interface SelectFieldConfig<T = Record<string, unknown>> extends FieldConfigBase<T> {
@@ -47,12 +43,18 @@ export interface SelectFieldConfig<T = Record<string, unknown>> extends FieldCon
     /** Options for select fields; 'encodings' resolves to the encoding list at render time */
     options?: SelectOption[] | 'encodings'
     rows?: never
+    placeholder?: never
+    className?: never
 }
 
 export interface TextAreaFieldConfig<T = Record<string, unknown>> extends FieldConfigBase<T> {
     type: 'textarea'
     /** Textarea row count */
     rows?: number
+    /** Static or mode-dependent placeholder */
+    placeholder?: string | ((mode: ConverterMode) => string)
+    /** Static or mode-dependent className */
+    className?: string | ((mode: ConverterMode) => string | undefined)
     options?: never
 }
 
