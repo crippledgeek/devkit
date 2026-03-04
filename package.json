@@ -15,7 +15,7 @@
     "@tanstack/react-form-devtools": "^0.1.6",
     "@tanstack/react-query": "^5.90.2",
     "@tanstack/react-router": "^1.132.37",
-    "@tanstack/zod-form-adapter": "^0.42.1",
+    "@tanstack/react-store": "^0.9.1",
     "buffer": "^6.0.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

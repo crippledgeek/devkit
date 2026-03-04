@@ -1,9 +1,7 @@
 import { Outlet } from '@tanstack/react-router'
 import Header from '@/components/Header'
-import type { FC } from 'react'
-type LayoutProps = object
 
-const Layout: FC<LayoutProps> = () => {
+export default function Layout() {
     return (
         <div className="min-h-screen flex flex-col">
             <Header />
@@ -13,5 +11,3 @@ const Layout: FC<LayoutProps> = () => {
         </div>
     )
 }
-
-export default Layout
